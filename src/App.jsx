@@ -169,7 +169,7 @@ function App() {
                   attribution="&copy; OpenRailwayMap contributors"
                 />
               )}
-              {showConnections && <LocationConnections />}
+              {showConnections && <LocationConnections locations={locations} />}
               {showHeatmap && (
                 <HeatmapOverlay
                   points={locations.map(l => ({
@@ -222,7 +222,7 @@ function App() {
           <button className="close-btn" onClick={() => setModalIsOpen(false)}>&times;</button>
         </div>
         {/* Alarm-Benachrichtigungssystem */}
-        {locations && locations.some(l => l.status === 'critical') && (
+        {Array.isArray(locations) && locations.some(l => l.status === 'critical') && (
           <Alert severity="error" sx={{ mb: 2 }}>
             Kritische Warnung: Mindestens ein Standort befindet sich im Status <b>Kritisch</b>!
           </Alert>

@@ -96,5 +96,3 @@ export function LocationMarkers({ onSelect, typeFilter, searchTerm, locations })
     </MarkerClusterGroup>
   );
 }
-
-export const LOCATIONS_DATA = LOCATIONS;

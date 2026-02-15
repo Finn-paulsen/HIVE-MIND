@@ -1,5 +1,5 @@
 import { Polyline } from 'react-leaflet';
-import { LOCATIONS_DATA } from './LocationMarkers';
+
 
 // Beispielhafte Verbindungen zwischen Standorten (über IDs)
 const CONNECTIONS = [
@@ -8,17 +8,19 @@ const CONNECTIONS = [
   ['power-1', 'server-1'],
 ];
 
-function getPositionById(id) {
-  const loc = LOCATIONS_DATA.find(l => l.id === id);
+
+function getPositionById(id, locations) {
+  if (!Array.isArray(locations)) return null;
+  const loc = locations.find(l => l.id === id);
   return loc ? loc.position : null;
 }
 
-export function LocationConnections() {
+export function LocationConnections({ locations }) {
   return (
     <>
       {CONNECTIONS.map(([from, to], idx) => {
-        const fromPos = getPositionById(from);
-        const toPos = getPositionById(to);
+        const fromPos = getPositionById(from, locations || []);
+        const toPos = getPositionById(to, locations || []);
         if (!fromPos || !toPos) return null;
         return (
           <Polyline

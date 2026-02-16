@@ -26,6 +26,8 @@ function downloadCsv(data, filename = 'standorte.csv') {
 }
 import CloseIcon from '@mui/icons-material/Close';
 import { FaBrain } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Modal from 'react-modal';
 
 import { MapContainer, TileLayer } from 'react-leaflet';
@@ -120,35 +122,53 @@ function App() {
   // Panel für Standortsteuerung
   function renderControlPanel() {
     if (!selectedLocation) {
-      return <Typography color="text.secondary" fontStyle="italic">Wähle einen Standort auf der Karte…</Typography>;
+      return <Typography sx={{ fontSize: '11px', color: '#666666', fontStyle: 'italic' }}>Select a facility on the map…</Typography>;
     }
     // Authentische Werte für ein Kraftwerk
     const fakeData = selectedLocation.type === 'power' ? {
       leistung: '1200 MW',
       temperatur: '320 °C',
       druck: '155 bar',
-      status: selectedLocation.status === 'active' ? 'Online' : (selectedLocation.status === 'critical' ? 'Warnung' : 'Offline'),
+      status: selectedLocation.status === 'active' ? 'Online' : (selectedLocation.status === 'critical' ? 'Warning' : 'Offline'),
       letzteWartung: '12.01.2026',
     } : null;
     return (
-      <Paper elevation={0} sx={{ p: 2, mb: 2, position: 'relative' }}>
-        <IconButton size="small" onClick={() => setSelectedLocation(null)} sx={{ position: 'absolute', top: 8, right: 8 }}>
+      <Paper elevation={0} sx={{ p: 2, mb: 2, position: 'relative', border: '1px solid #CCCCCC', borderRadius: 0, backgroundColor: '#FFFFFF' }}>
+        <IconButton size="small" onClick={() => setSelectedLocation(null)} sx={{ position: 'absolute', top: 4, right: 4, width: 20, height: 20 }}>
           <CloseIcon fontSize="small" />
         </IconButton>
-        <Typography variant="h6" color="primary" sx={{ mb: 1 }}>{selectedLocation.name}</Typography>
-        <Typography color="text.secondary">Status: <b style={{ color: '#2a4a7b' }}>{selectedLocation.status}</b></Typography>
-        <Typography sx={{ my: 1 }}>{selectedLocation.description}</Typography>
+        <Typography variant="h6" sx={{ mb: 1, fontSize: '12px', fontWeight: 'bold', color: '#003366' }}>{selectedLocation.name}</Typography>
+        <Typography sx={{ fontSize: '11px', color: '#000000' }}>Status: <b style={{ color: selectedLocation.status === 'critical' ? '#CC0000' : '#006600' }}>{selectedLocation.status.toUpperCase()}</b></Typography>
+        <Typography sx={{ my: 1, fontSize: '11px' }}>{selectedLocation.description}</Typography>
         {fakeData && (
           <>
-            <Typography variant="body2" sx={{ mt: 2, mb: 0.5 }}>Leistung: <b>{fakeData.leistung}</b></Typography>
-            <Typography variant="body2">Temperatur: <b>{fakeData.temperatur}</b></Typography>
-            <Typography variant="body2">Druck: <b>{fakeData.druck}</b></Typography>
-            <Typography variant="body2">Status: <b style={{ color: '#2a4a7b' }}>{fakeData.status}</b></Typography>
-            <Typography variant="body2">Letzte Wartung: <b>{fakeData.letzteWartung}</b></Typography>
+            <Typography variant="body2" sx={{ mt: 2, mb: 0.5, fontSize: '11px' }}>Leistung: <b>{fakeData.leistung}</b></Typography>
+            <Typography variant="body2" sx={{ fontSize: '11px' }}>Temperatur: <b>{fakeData.temperatur}</b></Typography>
+            <Typography variant="body2" sx={{ fontSize: '11px' }}>Druck: <b>{fakeData.druck}</b></Typography>
+            <Typography variant="body2" sx={{ fontSize: '11px' }}>Status: <b style={{ color: '#003366' }}>{fakeData.status}</b></Typography>
+            <Typography variant="body2" sx={{ fontSize: '11px' }}>Letzte Wartung: <b>{fakeData.letzteWartung}</b></Typography>
           </>
         )}
         <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-          <Button variant="contained" size="small" color="primary" onClick={() => alert('KraftwerkControl wird geöffnet...')}>In KraftwerkControl öffnen</Button>
+          <Button 
+            variant="contained" 
+            size="small" 
+            onClick={() => alert('KraftwerkControl wird geöffnet...')}
+            sx={{
+              backgroundColor: '#003366',
+              color: '#FFFFFF',
+              borderRadius: 0,
+              fontSize: '11px',
+              fontFamily: 'Arial, Tahoma, sans-serif',
+              textTransform: 'none',
+              boxShadow: '1px 1px 0 rgba(0,0,0,0.2)',
+              '&:hover': {
+                backgroundColor: '#0066CC'
+              }
+            }}
+          >
+            Open Control Panel
+          </Button>
         </div>
       </Paper>
     );
@@ -230,40 +250,40 @@ function App() {
             </MapContainer>
           )}
         </div>
-        <div style={{ flex: 1, minWidth: 260, background: '#f4f6fa', border: '1px solid #b0b7c3', borderRadius: 8, padding: 16, height: '100%' }}>
+        <div style={{ flex: 1, minWidth: 260, background: '#FFFFFF', border: '1px solid #CCCCCC', borderRadius: 0, padding: 16, height: '100%' }}>
           {renderControlPanel()}
           <FormControlLabel
-            control={<Checkbox checked={showConnections} onChange={e => setShowConnections(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Verbindungen anzeigen</Typography>}
-            sx={{ mt: 3 }}
+            control={<Checkbox checked={showConnections} onChange={e => setShowConnections(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Connections</Typography>}
+            sx={{ mt: 2 }}
           />
           <FormControlLabel
-            control={<Checkbox checked={showRailLayer} onChange={e => setShowRailLayer(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Schienennetz anzeigen</Typography>}
-            sx={{ mt: 1 }}
+            control={<Checkbox checked={showRailLayer} onChange={e => setShowRailLayer(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Rail Network</Typography>}
+            sx={{ mt: 0.5 }}
           />
           <FormControlLabel
-            control={<Checkbox checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Heatmap anzeigen</Typography>}
-            sx={{ mt: 1 }}
+            control={<Checkbox checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Heatmap</Typography>}
+            sx={{ mt: 0.5 }}
           />
           <FormControlLabel
-            control={<Checkbox checked={showEsriBoundaries} onChange={e => setShowEsriBoundaries(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Grenzen & Orte (Esri)</Typography>}
-            sx={{ mt: 1 }}
+            control={<Checkbox checked={showEsriBoundaries} onChange={e => setShowEsriBoundaries(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Boundaries & Places</Typography>}
+            sx={{ mt: 0.5 }}
           />
           <FormControlLabel
-            control={<Checkbox checked={showEsriTransportation} onChange={e => setShowEsriTransportation(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Straßen & Bahnlinien (Esri)</Typography>}
-            sx={{ mt: 1 }}
+            control={<Checkbox checked={showEsriTransportation} onChange={e => setShowEsriTransportation(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Roads & Railways</Typography>}
+            sx={{ mt: 0.5 }}
           />
           <FormControlLabel
-            control={<Checkbox checked={showEsriTopo} onChange={e => setShowEsriTopo(e.target.checked)} color="primary" />}
-            label={<Typography color="primary">Topografie (Esri)</Typography>}
-            sx={{ mt: 1 }}
+            control={<Checkbox checked={showEsriTopo} onChange={e => setShowEsriTopo(e.target.checked)} size="small" />}
+            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Topography</Typography>}
+            sx={{ mt: 0.5 }}
           />
-          <div style={{ marginTop: 12 }}>
-            <Typography variant="body2" color="primary" gutterBottom>Overlay-Transparenz</Typography>
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #CCCCCC' }}>
+            <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 'bold', color: '#000000', mb: 0.5 }}>Overlay Transparency</Typography>
             <input
               type="range"
               min={0}
@@ -273,7 +293,7 @@ function App() {
               onChange={e => setEsriOverlayOpacity(Number(e.target.value))}
               style={{ width: '100%' }}
             />
-            <Typography variant="caption" color="text.secondary">{Math.round(esriOverlayOpacity * 100)}%</Typography>
+            <Typography variant="caption" sx={{ fontSize: '10px', color: '#666666' }}>{Math.round(esriOverlayOpacity * 100)}%</Typography>
           </div>
         </div>
       </div>
@@ -282,19 +302,33 @@ function App() {
 
   return (
     <div className="hive-mind-app">
-      <div className="icon-container" onClick={() => setModalIsOpen(true)} title="Open Hive Mind">
-        <FaBrain size={60} color="#2a4a7b" />
+      <div className="icon-container" onClick={() => setModalIsOpen(true)} title="Open Infrastructure Monitoring System">
+        <FaBrain size={60} color="#003366" />
       </div>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         className="hive-mind-modal"
         overlayClassName="hive-mind-overlay"
-        contentLabel="Hive Mind Modal"
+        contentLabel="Infrastructure Monitoring System"
       >
         <div className="modal-header">
-          <h2>Hive Mind</h2>
-          <button className="close-btn" onClick={() => setModalIsOpen(false)}>&times;</button>
+          <div className="modal-header-title">
+            <h2>
+              🏛️ INFRASTRUCTURE MONITORING SYSTEM - v2.1
+            </h2>
+            <button className="close-btn" onClick={() => setModalIsOpen(false)}>×</button>
+          </div>
+          <div className="modal-header-subtitle">
+            Department of Infrastructure & Public Works
+          </div>
+          <div className="modal-header-menu">
+            <button className="menu-item">File</button>
+            <button className="menu-item">View</button>
+            <button className="menu-item">Tools</button>
+            <button className="menu-item">Reports</button>
+            <button className="menu-item">Help</button>
+          </div>
         </div>
         {/* Alarm-Benachrichtigungssystem */}
         {Array.isArray(locations) && locations.some(l => l.status === 'critical') && (
@@ -310,7 +344,23 @@ function App() {
         <div className="modal-content">
           {renderMainContent()}
         </div>
+        <div className="modal-status-bar">
+          <span>User: Administrator | Status: CONNECTED</span>
+          <span>{filteredLocations.length} Facilities | {new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</span>
+        </div>
       </Modal>
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

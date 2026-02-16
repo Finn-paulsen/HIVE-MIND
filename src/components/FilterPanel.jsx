@@ -90,119 +90,151 @@ export function FilterPanel({ filters, onFilterChange, totalCount, filteredCount
                           filters.countries.length > 0 || filters.search !== '';
 
   return (
-    <Paper elevation={2} sx={{ mb: 2, overflow: 'hidden' }}>
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        mb: 2, 
+        overflow: 'hidden',
+        border: '1px solid #CCCCCC',
+        borderRadius: 0,
+        backgroundColor: '#FFFFFF'
+      }}
+    >
       <Box 
         sx={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
-          p: 1.5,
-          backgroundColor: '#2a4a7b',
+          p: 1,
+          backgroundColor: '#003366',
           color: 'white',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          borderBottom: '1px solid #CCCCCC'
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-          Filter ({filteredCount} von {totalCount})
+        <Typography variant="h6" sx={{ fontSize: '11px', fontWeight: 'bold', fontFamily: 'Arial, Tahoma, sans-serif', textTransform: 'uppercase' }}>
+          Facility Filter
         </Typography>
-        <IconButton size="small" sx={{ color: 'white' }}>
-          {expanded ? <ExpandLess /> : <ExpandMore />}
+        <IconButton size="small" sx={{ color: 'white', width: 20, height: 20 }}>
+          {expanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
         </IconButton>
       </Box>
       
       <Collapse in={expanded}>
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2, backgroundColor: '#FFFFFF' }}>
           {/* Search Field */}
+          <Typography variant="body2" sx={{ mb: 0.5, fontSize: '11px', fontWeight: 'bold', color: '#000000' }}>
+            Search:
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Suche nach Name"
             value={filters.search}
             onChange={handleSearchChange}
-            sx={{ mb: 2 }}
-            placeholder="z.B. Berlin, München..."
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 0,
+                fontSize: '11px',
+                fontFamily: 'Arial, Tahoma, sans-serif',
+                backgroundColor: '#FFFFFF'
+              }
+            }}
+            placeholder="e.g. Berlin, Munich..."
           />
 
           {/* Building Type Filter */}
+          <Typography variant="body2" sx={{ mb: 0.5, fontSize: '11px', fontWeight: 'bold', color: '#000000' }}>
+            Building Type:
+          </Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Gebäudetypen</InputLabel>
             <Select
               multiple
               value={filters.types}
               onChange={handleTypeChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip 
-                      key={value} 
-                      label={BUILDING_TYPES.find(t => t.value === value)?.label || value}
-                      size="small"
-                    />
-                  ))}
-                </Box>
-              )}
+              displayEmpty
+              sx={{
+                borderRadius: 0,
+                fontSize: '11px',
+                fontFamily: 'Arial, Tahoma, sans-serif',
+                backgroundColor: '#FFFFFF'
+              }}
+              renderValue={(selected) => {
+                if (selected.length === 0) return <em style={{ color: '#666666' }}>All Types</em>;
+                return selected.map(value => 
+                  BUILDING_TYPES.find(t => t.value === value)?.label || value
+                ).join(', ');
+              }}
             >
               {BUILDING_TYPES.map((type) => (
-                <MenuItem key={type.value} value={type.value}>
-                  <Checkbox checked={filters.types.indexOf(type.value) > -1} />
-                  <ListItemText primary={type.label} />
+                <MenuItem key={type.value} value={type.value} sx={{ fontSize: '11px' }}>
+                  <Checkbox checked={filters.types.indexOf(type.value) > -1} size="small" />
+                  <ListItemText primary={type.label} sx={{ '& .MuiTypography-root': { fontSize: '11px' } }} />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
           {/* Status Filter */}
+          <Typography variant="body2" sx={{ mb: 0.5, fontSize: '11px', fontWeight: 'bold', color: '#000000' }}>
+            Operational Status:
+          </Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Status</InputLabel>
             <Select
               multiple
               value={filters.statuses}
               onChange={handleStatusChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip 
-                      key={value} 
-                      label={STATUS_OPTIONS.find(s => s.value === value)?.label || value}
-                      size="small"
-                    />
-                  ))}
-                </Box>
-              )}
+              displayEmpty
+              sx={{
+                borderRadius: 0,
+                fontSize: '11px',
+                fontFamily: 'Arial, Tahoma, sans-serif',
+                backgroundColor: '#FFFFFF'
+              }}
+              renderValue={(selected) => {
+                if (selected.length === 0) return <em style={{ color: '#666666' }}>All Status</em>;
+                return selected.map(value => 
+                  STATUS_OPTIONS.find(s => s.value === value)?.label || value
+                ).join(', ');
+              }}
             >
               {STATUS_OPTIONS.map((status) => (
-                <MenuItem key={status.value} value={status.value}>
-                  <Checkbox checked={filters.statuses.indexOf(status.value) > -1} />
-                  <ListItemText primary={status.label} />
+                <MenuItem key={status.value} value={status.value} sx={{ fontSize: '11px' }}>
+                  <Checkbox checked={filters.statuses.indexOf(status.value) > -1} size="small" />
+                  <ListItemText primary={status.label} sx={{ '& .MuiTypography-root': { fontSize: '11px' } }} />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
           {/* Country Filter */}
+          <Typography variant="body2" sx={{ mb: 0.5, fontSize: '11px', fontWeight: 'bold', color: '#000000' }}>
+            Region:
+          </Typography>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel>Länder</InputLabel>
             <Select
               multiple
               value={filters.countries}
               onChange={handleCountryChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip 
-                      key={value} 
-                      label={COUNTRY_OPTIONS.find(c => c.value === value)?.label || value}
-                      size="small"
-                    />
-                  ))}
-                </Box>
-              )}
+              displayEmpty
+              sx={{
+                borderRadius: 0,
+                fontSize: '11px',
+                fontFamily: 'Arial, Tahoma, sans-serif',
+                backgroundColor: '#FFFFFF'
+              }}
+              renderValue={(selected) => {
+                if (selected.length === 0) return <em style={{ color: '#666666' }}>All Regions</em>;
+                return selected.map(value => 
+                  COUNTRY_OPTIONS.find(c => c.value === value)?.label || value
+                ).join(', ');
+              }}
             >
               {COUNTRY_OPTIONS.map((country) => (
-                <MenuItem key={country.value} value={country.value}>
-                  <Checkbox checked={filters.countries.indexOf(country.value) > -1} />
-                  <ListItemText primary={country.label} />
+                <MenuItem key={country.value} value={country.value} sx={{ fontSize: '11px' }}>
+                  <Checkbox checked={filters.countries.indexOf(country.value) > -1} size="small" />
+                  <ListItemText primary={country.label} sx={{ '& .MuiTypography-root': { fontSize: '11px' } }} />
                 </MenuItem>
               ))}
             </Select>
@@ -216,11 +248,35 @@ export function FilterPanel({ filters, onFilterChange, totalCount, filteredCount
               size="small"
               startIcon={<Clear />}
               onClick={handleClearAll}
-              sx={{ color: '#2a4a7b', borderColor: '#2a4a7b' }}
+              sx={{ 
+                color: '#003366', 
+                borderColor: '#CCCCCC',
+                borderRadius: 0,
+                fontSize: '11px',
+                fontFamily: 'Arial, Tahoma, sans-serif',
+                textTransform: 'none',
+                mb: 2,
+                '&:hover': {
+                  backgroundColor: '#E6F2FF',
+                  borderColor: '#0066CC'
+                }
+              }}
             >
-              Alle Filter zurücksetzen
+              Reset All
             </Button>
           )}
+
+          {/* Results Counter */}
+          <Box sx={{ 
+            mt: 2, 
+            pt: 2, 
+            borderTop: '1px solid #CCCCCC',
+            textAlign: 'center'
+          }}>
+            <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 'bold', color: '#003366' }}>
+              Results: {filteredCount} of {totalCount} shown
+            </Typography>
+          </Box>
         </Box>
       </Collapse>
     </Paper>

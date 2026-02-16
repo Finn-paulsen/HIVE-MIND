@@ -1,0 +1,221 @@
+[
+  {
+    "id": "power-1",
+    "name": "Kraftwerk Nord",
+    "type": "power",
+    "position": [52.52, 13.405],
+    "status": "active",
+    "description": "Kohlekraftwerk, Berlin. Leistung: 1200 MW.",
+    "infoUrl": "https://de.wikipedia.org/wiki/Kraftwerk_Reuter",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" },
+      { "timestamp": "2026-01-10T12:00:00Z", "status": "critical" },
+      { "timestamp": "2026-01-12T16:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "power-2",
+    "name": "Kernkraftwerk Süd",
+    "type": "power",
+    "position": [48.5351, 12.982],
+    "status": "active",
+    "description": "Kernkraftwerk, Nähe Landshut. Leistung: 1400 MW.",
+    "infoUrl": "https://de.wikipedia.org/wiki/Kernkraftwerk_Isar",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" },
+      { "timestamp": "2026-01-15T10:00:00Z", "status": "offline" }
+    ]
+  },
+  {
+    "id": "airport-1",
+    "name": "Flughafen Düsseldorf",
+    "type": "airport",
+    "position": [51.2895, 6.7668],
+    "status": "active",
+    "description": "Düsseldorf Airport, NRW.",
+    "infoUrl": "https://ourairports.com/airports/EDDL/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "airport-2",
+    "name": "Flughafen München",
+    "type": "airport",
+    "position": [48.3538, 11.7861],
+    "status": "active",
+    "description": "Franz Josef Strauß Flughafen, München.",
+    "infoUrl": "https://ourairports.com/airports/EDDM/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "hospital-1",
+    "name": "Charité Berlin",
+    "type": "hospital",
+    "position": [52.5232, 13.3781],
+    "status": "active",
+    "description": "Universitätsklinikum, Berlin Mitte.",
+    "infoUrl": "https://www.charite.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "hospital-2",
+    "name": "Universitätsklinikum Hamburg-Eppendorf",
+    "type": "hospital",
+    "position": [53.5901, 9.9721],
+    "status": "active",
+    "description": "Großes Klinikum in Hamburg.",
+    "infoUrl": "https://www.uke.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "water-1",
+    "name": "Wasserwerk Tegel",
+    "type": "water",
+    "position": [52.5736, 13.2936],
+    "status": "active",
+    "description": "Wasserwerk im Norden Berlins.",
+    "infoUrl": "https://www.bwb.de/de/standorte.php",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "gov-1",
+    "name": "Bundeskanzleramt",
+    "type": "gov",
+    "position": [52.5208, 13.3695],
+    "status": "active",
+    "description": "Regierungsgebäude, Berlin.",
+    "infoUrl": "https://www.bundeskanzleramt.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "server-1",
+    "name": "Rechenzentrum Frankfurt",
+    "type": "server",
+    "position": [50.1109, 8.6821],
+    "status": "active",
+    "description": "Großes Internet-Knoten-Rechenzentrum, Frankfurt am Main.",
+    "infoUrl": "https://www.de-cix.net/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "fire-1",
+    "name": "Feuerwache Köln",
+    "type": "fire",
+    "position": [50.9384, 6.9578],
+    "status": "active",
+    "description": "Zentrale Feuerwache, Köln Innenstadt.",
+    "infoUrl": "https://www.stadt-koeln.de/artikel/00001/index.html",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "police-1",
+    "name": "Polizeipräsidium München",
+    "type": "police",
+    "position": [48.1371, 11.5754],
+    "status": "active",
+    "description": "Zentrale Polizeiinspektion, München.",
+    "infoUrl": "https://www.polizei.bayern.de/muenchen/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "school-1",
+    "name": "Gymnasium Eppendorf",
+    "type": "school",
+    "position": [53.5952, 9.9786],
+    "status": "active",
+    "description": "Schule in Hamburg Eppendorf.",
+    "infoUrl": "https://gymnasium-eppendorf.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "cityhall-1",
+    "name": "Rathaus Leipzig",
+    "type": "cityhall",
+    "position": [51.3397, 12.3731],
+    "status": "active",
+    "description": "Stadtrathaus, Leipzig Zentrum.",
+    "infoUrl": "https://www.leipzig.de/rathaus/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "bridge-1",
+    "name": "Kölner Hohenzollernbrücke",
+    "type": "bridge",
+    "position": [50.9413, 6.9639],
+    "status": "active",
+    "description": "Bekannte Eisenbahnbrücke über den Rhein.",
+    "infoUrl": "https://de.wikipedia.org/wiki/Hohenzollernbr%C3%BCcke",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "port-1",
+    "name": "Hamburger Hafen",
+    "type": "port",
+    "position": [53.5461, 9.9661],
+    "status": "active",
+    "description": "Größter Seehafen Deutschlands.",
+    "infoUrl": "https://www.hamburg-port-authority.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "energy-1",
+    "name": "Umspannwerk Stuttgart",
+    "type": "energy",
+    "position": [48.7758, 9.1829],
+    "status": "active",
+    "description": "Großes Umspannwerk, Stuttgart.",
+    "infoUrl": "https://www.netze-bw.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "metro-1",
+    "name": "U-Bahnhof Alexanderplatz",
+    "type": "metro",
+    "position": [52.5219, 13.4132],
+    "status": "active",
+    "description": "Großer U-Bahnhof, Berlin Mitte.",
+    "infoUrl": "https://de.wikipedia.org/wiki/Bahnhof_Berlin_Alexanderplatz",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  },
+  {
+    "id": "university-1",
+    "name": "LMU München",
+    "type": "university",
+    "position": [48.1502, 11.5802],
+    "status": "active",
+    "description": "Ludwig-Maximilians-Universität München.",
+    "infoUrl": "https://www.lmu.de/",
+    "history": [
+      { "timestamp": "2026-01-01T08:00:00Z", "status": "active" }
+    ]
+  }
+]

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import BaseTerminal from '../BaseTerminal';
 import AnalogGauge from '../controls/AnalogGauge';
 import ToggleSwitch from '../controls/ToggleSwitch';
@@ -8,9 +9,23 @@ import LEDIndicator from '../controls/LEDIndicator';
 import DigitalDisplay from '../controls/DigitalDisplay';
 import Slider from '../controls/Slider';
 import StatusBoard from '../controls/StatusBoard';
+import AuditLog from '../controls/AuditLog';
+import SaveRevertButtons from '../controls/SaveRevertButtons';
 
 export default function PowerPlantTerminal({ location, onClose }) {
   const [activeTab, setActiveTab] = useState('reactor');
+  
+  // Track changes for save/revert functionality
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [savedState, setSavedState] = useState(null);
+  const [auditLog, setAuditLog] = useState([
+    {
+      timestamp: new Date().toLocaleTimeString(),
+      message: 'Terminal session started',
+      user: 'Administrator',
+      type: 'info'
+    }
+  ]);
   
   // Reactor state
   const [coreTemp, setCoreTemp] = useState(320);
@@ -79,6 +94,71 @@ export default function PowerPlantTerminal({ location, onClose }) {
     }
   }, [controlRodPosition, emergencyMode]);
 
+  // Helper function to add audit log entry
+  const addLogEntry = (message, type = 'info') => {
+    const entry = {
+      timestamp: new Date().toLocaleTimeString(),
+      message,
+      user: 'Administrator',
+      type
+    };
+    setAuditLog(prev => [...prev, entry]);
+    
+    // Show toast notification
+    if (type === 'error') {
+      toast.error(message);
+    } else if (type === 'warning') {
+      toast.warning(message);
+    } else {
+      toast.info(message);
+    }
+  };
+
+  // Save current state as baseline
+  const saveCurrentState = () => {
+    const state = {
+      coreTemp,
+      controlRodPosition,
+      neutronFlux,
+      coolantPressure,
+      turbineRPM,
+      powerOutput,
+      circuitBreakers
+    };
+    setSavedState(state);
+    setHasUnsavedChanges(false);
+    addLogEntry('Configuration saved successfully');
+  };
+
+  // Revert to saved state
+  const revertToSavedState = () => {
+    if (savedState) {
+      setCoreTemp(savedState.coreTemp);
+      setControlRodPosition(savedState.controlRodPosition);
+      setNeutronFlux(savedState.neutronFlux);
+      setCoolantPressure(savedState.coolantPressure);
+      setTurbineRPM(savedState.turbineRPM);
+      setPowerOutput(savedState.powerOutput);
+      setCircuitBreakers(savedState.circuitBreakers);
+      setHasUnsavedChanges(false);
+      addLogEntry('Configuration reverted to last saved state', 'warning');
+    }
+  };
+
+  // Initialize saved state on mount
+  useEffect(() => {
+    const initialState = {
+      coreTemp,
+      controlRodPosition,
+      neutronFlux,
+      coolantPressure,
+      turbineRPM,
+      powerOutput,
+      circuitBreakers
+    };
+    setSavedState(initialState);
+  }, []);
+
   const tabs = [
     { id: 'reactor', label: 'Reaktorkern' },
     { id: 'turbine', label: 'Turbinenhalle' },
@@ -98,6 +178,8 @@ export default function PowerPlantTerminal({ location, onClose }) {
       grid2: false,
       grid3: false
     });
+    setHasUnsavedChanges(true);
+    addLogEntry('EMERGENCY SHUTDOWN initiated', 'error');
   };
 
   const handleCircuitBreakerToggle = (breaker) => {
@@ -105,6 +187,14 @@ export default function PowerPlantTerminal({ location, onClose }) {
       ...prev,
       [breaker]: !prev[breaker]
     }));
+    setHasUnsavedChanges(true);
+    addLogEntry(`Circuit breaker ${breaker} ${!circuitBreakers[breaker] ? 'engaged' : 'disengaged'}`);
+  };
+
+  const handleControlRodChange = (newValue) => {
+    setControlRodPosition(newValue);
+    setHasUnsavedChanges(true);
+    addLogEntry(`Control rod position set to ${newValue}%`);
   };
 
   const renderReactorControls = () => (
@@ -282,7 +372,7 @@ export default function PowerPlantTerminal({ location, onClose }) {
           max={100}
           step={1}
           unit="%"
-          onChange={setControlRodPosition}
+          onChange={handleControlRodChange}
           disabled={emergencyMode}
         />
         <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'space-around' }}>
@@ -885,10 +975,36 @@ export default function PowerPlantTerminal({ location, onClose }) {
       onTabChange={setActiveTab}
       onClose={onClose}
     >
-      {activeTab === 'reactor' && renderReactorControls()}
-      {activeTab === 'turbine' && renderTurbineControls()}
-      {activeTab === 'grid' && renderGridControls()}
-      {activeTab === 'emergency' && renderEmergencyControls()}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Save/Revert Buttons Bar */}
+        <div style={{
+          padding: '8px 16px',
+          borderBottom: '1px solid #CCCCCC',
+          backgroundColor: '#F0F0F0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <SaveRevertButtons
+            hasChanges={hasUnsavedChanges}
+            onSave={saveCurrentState}
+            onRevert={revertToSavedState}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {activeTab === 'reactor' && renderReactorControls()}
+          {activeTab === 'turbine' && renderTurbineControls()}
+          {activeTab === 'grid' && renderGridControls()}
+          {activeTab === 'emergency' && renderEmergencyControls()}
+        </div>
+
+        {/* Audit Log at Bottom */}
+        <div style={{ borderTop: '1px solid #CCCCCC', padding: '8px' }}>
+          <AuditLog entries={auditLog} maxEntries={8} />
+        </div>
+      </div>
     </BaseTerminal>
   );
 }

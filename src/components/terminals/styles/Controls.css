@@ -1,6 +1,6 @@
-/* Control Components Styling */
+/* Industrial Control Components Styling */
 
-/* Analog Gauge */
+/* Analog Gauge - Industrial Style */
 .analog-gauge {
   position: relative;
   width: 100%;
@@ -9,12 +9,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, var(--metal-medium) 0%, var(--metal-dark) 100%);
+  border: 2px solid var(--metal-highlight);
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .gauge-container {
   position: relative;
   width: 180px;
   height: 180px;
+  background: radial-gradient(circle, #1a1f28 0%, #0a0f18 100%);
+  border-radius: 50%;
+  border: 3px solid var(--metal-shadow);
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .gauge-background {
@@ -26,13 +39,13 @@
   position: absolute;
   bottom: 50%;
   left: 50%;
-  width: 3px;
+  width: 4px;
   height: 45%;
-  background: #ff3333;
+  background: var(--status-red);
   transform-origin: bottom center;
   transform: translateX(-50%) rotate(-90deg);
   transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-  box-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
+  box-shadow: 0 0 6px rgba(244, 67, 54, 0.8);
   border-radius: 2px 2px 0 0;
 }
 
@@ -40,86 +53,107 @@
   position: absolute;
   bottom: 50%;
   left: 50%;
-  width: 12px;
-  height: 12px;
-  background: #888;
-  border: 2px solid #444;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #666, #333);
+  border: 2px solid var(--metal-shadow);
   border-radius: 50%;
   transform: translate(-50%, 50%);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .gauge-label {
   text-align: center;
   margin-top: 8px;
-  font-size: 12px;
-  color: #66ff66;
+  font-size: 11px;
+  color: var(--terminal-label);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-family: 'Arial', sans-serif;
 }
 
 .gauge-value {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--terminal-text);
   font-weight: 700;
-  text-shadow: 0 0 8px var(--terminal-glow);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   margin-top: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-family: 'Consolas', monospace;
 }
 
-/* Toggle Switch */
+/* Toggle Switch - Industrial Style */
 .toggle-switch {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   padding: 12px;
+  background: linear-gradient(135deg, var(--metal-medium) 0%, var(--metal-dark) 100%);
+  border: 2px solid var(--metal-highlight);
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch-label {
-  font-size: 11px;
-  color: #66ff66;
+  font-size: 10px;
+  color: var(--terminal-label);
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: 'Arial', sans-serif;
 }
 
 .toggle-switch-control {
   position: relative;
-  width: 60px;
-  height: 30px;
-  background: #1a2a3a;
-  border: 2px solid #2a4a5a;
-  border-radius: 15px;
+  width: 64px;
+  height: 32px;
+  background: linear-gradient(180deg, #1a1f28 0%, #0a0f18 100%);
+  border: 2px solid var(--metal-shadow);
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch-control.active {
-  background: rgba(51, 255, 51, 0.3);
-  border-color: #33ff33;
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
+  border-color: var(--status-green);
   box-shadow: 
-    inset 0 2px 5px rgba(0, 0, 0, 0.5),
-    0 0 15px rgba(51, 255, 51, 0.5);
+    inset 0 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 8px rgba(76, 175, 80, 0.5);
 }
 
 .toggle-switch-handle {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(145deg, #888, #555);
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(145deg, #888, #444);
+  border: 1px solid #222;
+  border-radius: 2px;
   transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
 .toggle-switch-control.active .toggle-switch-handle {
-  left: calc(100% - 23px);
-  background: linear-gradient(145deg, #66ff66, #33ff33);
-  box-shadow: 0 0 10px rgba(51, 255, 51, 0.8);
+  left: calc(100% - 25px);
+  background: linear-gradient(145deg, #66bb6a, #43a047);
+  border-color: var(--status-green);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 0 6px rgba(76, 175, 80, 0.6);
 }
 
 /* Push Button */
@@ -195,55 +229,70 @@
   background: linear-gradient(145deg, #cc0000, #990000);
 }
 
-/* LED Indicator */
+/* LED Indicator - Industrial Style */
 .led-indicator {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, var(--metal-medium) 0%, var(--metal-dark) 100%);
+  border: 2px solid var(--metal-highlight);
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .led-light {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid #333;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  border: 3px solid var(--metal-shadow);
+  box-shadow: 
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.5);
   transition: all 0.3s;
 }
 
 .led-light.green {
-  background: radial-gradient(circle at 30% 30%, #66ff66, #33cc33);
+  background: radial-gradient(circle at 35% 35%, #81c784, #4caf50);
   box-shadow: 
-    0 0 15px rgba(51, 255, 51, 0.8),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 12px rgba(76, 175, 80, 0.9),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .led-light.red {
-  background: radial-gradient(circle at 30% 30%, #ff5555, #cc0000);
+  background: radial-gradient(circle at 35% 35%, #e57373, #f44336);
   box-shadow: 
-    0 0 15px rgba(255, 51, 51, 0.8),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 12px rgba(244, 67, 54, 0.9),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .led-light.yellow {
-  background: radial-gradient(circle at 30% 30%, #ffff66, #cccc00);
+  background: radial-gradient(circle at 35% 35%, #ffb74d, #ff9800);
   box-shadow: 
-    0 0 15px rgba(255, 255, 51, 0.8),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 12px rgba(255, 152, 0, 0.9),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .led-light.blue {
-  background: radial-gradient(circle at 30% 30%, #66ccff, #3399cc);
+  background: radial-gradient(circle at 35% 35%, #64b5f6, #2196f3);
   box-shadow: 
-    0 0 15px rgba(51, 204, 255, 0.8),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 12px rgba(33, 150, 243, 0.9),
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .led-light.off {
-  background: #2a2a2a;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: radial-gradient(circle at 35% 35%, #424242, #212121);
+  box-shadow: 
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}
 }
 
 .led-light.pulse {
@@ -256,58 +305,71 @@
 }
 
 .led-label {
-  font-size: 10px;
-  color: #66ff66;
+  font-size: 9px;
+  color: var(--terminal-label);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  font-family: 'Arial', sans-serif;
 }
 
-/* Digital Display */
+/* Digital Display - Industrial Style */
 .digital-display {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 12px;
+  background: linear-gradient(135deg, var(--metal-medium) 0%, var(--metal-dark) 100%);
+  border: 2px solid var(--metal-highlight);
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .digital-display-label {
-  font-size: 11px;
-  color: #66ff66;
+  font-size: 10px;
+  color: var(--terminal-label);
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: 'Arial', sans-serif;
 }
 
 .digital-display-screen {
   background: #000;
-  border: 2px solid #333;
+  border: 3px solid var(--metal-shadow);
   padding: 12px 16px;
-  font-family: 'Courier New', 'DSEG7', monospace;
-  font-size: 28px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 24px;
   color: #ff3333;
   text-align: center;
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
-  border-radius: 4px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+  border-radius: 2px;
   box-shadow: 
-    inset 0 2px 8px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(255, 51, 51, 0.3);
+    inset 0 3px 10px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(255, 51, 51, 0.3);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .digital-display-screen.green {
-  color: #33ff33;
-  text-shadow: 0 0 10px rgba(51, 255, 51, 0.8);
+  color: #4caf50;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
   box-shadow: 
-    inset 0 2px 8px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(51, 255, 51, 0.3);
+    inset 0 3px 10px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(76, 175, 80, 0.3);
 }
 
 .digital-display-screen.blue {
-  color: #00ccff;
-  text-shadow: 0 0 10px rgba(0, 204, 255, 0.8);
+  color: #2196f3;
+  text-shadow: 0 0 8px rgba(33, 150, 243, 0.8);
   box-shadow: 
-    inset 0 2px 8px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(0, 204, 255, 0.3);
+    inset 0 3px 10px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(33, 150, 243, 0.3);
 }
 
 /* Slider Control */

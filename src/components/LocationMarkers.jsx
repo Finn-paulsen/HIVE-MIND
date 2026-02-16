@@ -32,11 +32,45 @@ const statusLabel = {
   offline: 'Offline',
 };
 
-export function LocationMarkers({ onSelect, typeFilter, locations }) {
-  // Nur nach Typ filtern
+export function LocationMarkers({ onSelect, typeFilter, locations, filters }) {
+  // Multi-criteria filtering
   const filtered = (locations || []).filter(loc => {
-    return !typeFilter || loc.type === typeFilter;
+    // Legacy single type filter (if provided)
+    if (typeFilter && loc.type !== typeFilter) {
+      return false;
+    }
+    
+    // New multi-filter support
+    if (filters) {
+      // Type filter
+      if (filters.types && filters.types.length > 0 && !filters.types.includes(loc.type)) {
+        return false;
+      }
+      
+      // Status filter
+      if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes(loc.status)) {
+        return false;
+      }
+      
+      // Country filter
+      if (filters.countries && filters.countries.length > 0 && !filters.countries.includes(loc.country)) {
+        return false;
+      }
+      
+      // Search filter
+      if (filters.search && filters.search.trim() !== '') {
+        const searchLower = filters.search.toLowerCase();
+        const matchesName = loc.name.toLowerCase().includes(searchLower);
+        const matchesDescription = loc.description?.toLowerCase().includes(searchLower);
+        if (!matchesName && !matchesDescription) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
   });
+
   return (
     <MarkerClusterGroup>
       {filtered.map(loc => (

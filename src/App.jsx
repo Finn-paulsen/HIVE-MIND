@@ -64,8 +64,8 @@ function App() {
     countries: [],
     search: ''
   });
-  // Legacy filter support
-  const [typeFilter, setTypeFilter] = useState('');
+  // Legacy filter support (kept for backward compatibility)
+  // const [typeFilter, setTypeFilter] = useState('');
   // Dynamische Standortdaten
   const [locations, setLocations] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
@@ -80,7 +80,7 @@ function App() {
         setLocations(res.data);
         setLoadingLocations(false);
       })
-      .catch(err => {
+      .catch(() => {
         setLocationsError('Fehler beim Laden der Standorte');
         setLoadingLocations(false);
       });

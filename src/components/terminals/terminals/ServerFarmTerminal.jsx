@@ -42,7 +42,7 @@ export default function ServerFarmTerminal({ location, onClose }) {
   const [tempZone1, setTempZone1] = useState(22);
   const [tempZone2, setTempZone2] = useState(23);
   const [humidity, setHumidity] = useState(45);
-  const [coolingMode, setCoolingMode] = useState('auto');
+  const [UNUSED_coolingMode, UNUSED_setCoolingMode] = useState('auto');
 
   useEffect(() => {
     const interval = setInterval(() => {

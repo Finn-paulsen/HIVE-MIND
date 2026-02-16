@@ -12,7 +12,7 @@ export default function CityHallTerminal({ location, onClose }) {
   // Administration state
   const [citizenServices, setCitizenServices] = useState(47);
   const [permitsIssued, setPermitsIssued] = useState(12);
-  const [publicMeetings, setPublicMeetings] = useState(2);
+  const [publicMeetings, UNUSED_setPublicMeetings] = useState(2);
   
   // Departments state
   const [departments, setDepartments] = useState({
@@ -21,7 +21,7 @@ export default function CityHallTerminal({ location, onClose }) {
     finance: true,
     publicWorks: true
   });
-  const [staffPresent, setStaffPresent] = useState(127);
+  const [staffPresent, UNUSED_setStaffPresent] = useState(127);
   
   // Records state
   const [recordsAccessed, setRecordsAccessed] = useState(234);
@@ -37,11 +37,11 @@ export default function CityHallTerminal({ location, onClose }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setCitizenServices(prev => Math.max(0, prev + Math.floor(Math.random() * 5 - 2)));
-      setPermitsIssued(prev => prev + Math.floor(Math.random() * 2));
-      setRecordsAccessed(prev => prev + Math.floor(Math.random() * 10));
-      setDatabaseLoad(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 5)));
-      setTemperature(prev => 21 + Math.random() * 2);
-      setOccupancy(prev => Math.max(0, Math.min(500, prev + Math.floor(Math.random() * 10 - 5))));
+      setPermitsIssued(_prev => _prev + Math.floor(Math.random() * 2));
+      setRecordsAccessed(_prev => _prev + Math.floor(Math.random() * 10));
+      setDatabaseLoad(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 5)));
+      setTemperature(_prev => 21 + Math.random() * 2);
+      setOccupancy(_prev => Math.max(0, Math.min(500, _prev + Math.floor(Math.random() * 10 - 5))));
     }, 4000);
 
     return () => clearInterval(interval);

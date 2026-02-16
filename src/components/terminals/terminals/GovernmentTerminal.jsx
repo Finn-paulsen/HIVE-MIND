@@ -12,7 +12,7 @@ export default function GovernmentTerminal({ location, onClose }) {
   const [activeTab, setActiveTab] = useState('security');
   
   // Security state
-  const [securityLevel, setSecurityLevel] = useState(2);
+  const [securityLevel, UNUSED_setSecurityLevel2] = useState(2);
   const [accessGates, setAccessGates] = useState({
     mainEntrance: true,
     staffEntrance: true,
@@ -22,15 +22,15 @@ export default function GovernmentTerminal({ location, onClose }) {
   const [badgesActive, setBadgesActive] = useState(247);
   
   // Communications state
-  const [encryptedLines, setEncryptedLines] = useState(12);
+  const [encryptedLines, UNUSED_setEncryptedLines] = useState(12);
   const [activeCalls, setActiveCalls] = useState(8);
   const [satelliteLink, setSatelliteLink] = useState(true);
   const [secureNetwork, setSecureNetwork] = useState(true);
   
   // Operations state
   const [documentsProcessed, setDocumentsProcessed] = useState(1247);
-  const [pendingApprovals, setPendingApprovals] = useState(34);
-  const [meetingsActive, setMeetingsActive] = useState(6);
+  const [pendingApprovals, UNUSED_setPendingApprovals] = useState(34);
+  const [meetingsActive, UNUSED_setMeetingsActive] = useState(6);
   
   // Infrastructure state
   const [powerBackup, setPowerBackup] = useState(false);
@@ -39,10 +39,10 @@ export default function GovernmentTerminal({ location, onClose }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBadgesActive(prev => Math.max(0, prev + Math.floor(Math.random() * 10 - 5)));
-      setActiveCalls(prev => Math.max(0, prev + Math.floor(Math.random() * 3 - 1)));
-      setDocumentsProcessed(prev => prev + Math.floor(Math.random() * 5));
-      setServerRoomTemp(prev => 20 + Math.random() * 4);
+      setBadgesActive((_prev) => Math.max(0, _prev + Math.floor(Math.random() * 10 - 5)));
+      setActiveCalls((_prev) => Math.max(0, _prev + Math.floor(Math.random() * 3 - 1)));
+      setDocumentsProcessed((_prev) => _prev + Math.floor(Math.random() * 5));
+      setServerRoomTemp((_prev) => 20 + Math.random() * 4);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -56,7 +56,7 @@ export default function GovernmentTerminal({ location, onClose }) {
   ];
 
   const handleGateToggle = (gate) => {
-    setAccessGates(prev => ({
+    setAccessGates((prev) => ({
       ...prev,
       [gate]: !prev[gate]
     }));

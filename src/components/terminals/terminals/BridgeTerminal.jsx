@@ -19,10 +19,10 @@ export default function BridgeTerminal({ location, onClose }) {
     lane1South: true,
     lane2South: true
   });
-  const [trafficLevel, setTrafficLevel] = useState(2);
+  const [trafficLevel, UNUSED_setTrafficLevel] = useState(2);
   
   // Structure state
-  const [cabletension, setCableTension] = useState(87);
+  const [cableTension, setCableTension] = useState(87);
   const [deckVibration, setDeckVibration] = useState(2.1);
   const [windSpeed, setWindSpeed] = useState(18);
   const [temperature, setTemperature] = useState(15);
@@ -30,13 +30,13 @@ export default function BridgeTerminal({ location, onClose }) {
   // Systems state
   const [lighting, setLighting] = useState(true);
   const [tollSystem, setTollSystem] = useState(true);
-  const [cameras, setCameras] = useState(16);
+  const [cameras, UNUSED_setCameras] = useState(16);
   const [drawbridge, setDrawbridge] = useState(false);
   
   // Safety state
   const [iceWarning, setIceWarning] = useState(false);
   const [windWarning, setWindWarning] = useState(false);
-  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [emergencyMode, UNUSED_setEmergencyMode] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {

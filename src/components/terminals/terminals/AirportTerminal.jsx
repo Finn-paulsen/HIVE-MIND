@@ -25,11 +25,11 @@ export default function AirportTerminal({ location, onClose }) {
   
   // Radar state
   const [aircraftTracked, setAircraftTracked] = useState(24);
-  const [radarRange, setRadarRange] = useState(60);
+  const [radarRange, _setRadarRange] = useState(60);
   const [transponderSignals, setTransponderSignals] = useState(22);
   
   // Gates state
-  const [gatesOccupied, setGatesOccupied] = useState(18);
+  const [gatesOccupied, _setGatesOccupied] = useState(18);
   const [jetbridges, setJetbridges] = useState({
     gateA1: true,
     gateA2: false,

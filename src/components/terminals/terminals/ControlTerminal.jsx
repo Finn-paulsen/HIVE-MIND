@@ -32,10 +32,10 @@ export default function ControlTerminal({ location, onClose }) {
   const [encryption, setEncryption] = useState(true);
   
   // Security state
-  const [securityLevel, setSecurityLevel] = useState(3);
+  const [securityLevel, UNUSED_setSecurityLevel] = useState(3);
   const [accessControl, setAccessControl] = useState(true);
   const [auditLog, setAuditLog] = useState(true);
-  const [intrusion, setIntrusion] = useState(false);
+  const [intrusion, UNUSED_setIntrusion] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -13,8 +13,8 @@ export default function HospitalTerminal({ location, onClose }) {
   
   // Emergency state
   const [emergencyPatients, setEmergencyPatients] = useState(12);
-  const [erBeds, setErBeds] = useState(8);
-  const [ambulancesAvailable, setAmbulancesAvailable] = useState(3);
+  const [erBeds, UNUSED_setErBeds] = useState(8);
+  const [ambulancesAvailable, UNUSED_setAmbulancesAvailable] = useState(3);
   const [traumaBays, setTraumaBays] = useState({
     bay1: true,
     bay2: false,
@@ -24,9 +24,9 @@ export default function HospitalTerminal({ location, onClose }) {
   
   // ICU state
   const [icuOccupancy, setIcuOccupancy] = useState(18);
-  const [ventilators, setVentilators] = useState(12);
-  const [ventilatorsInUse, setVentilatorsInUse] = useState(9);
-  const [criticalPatients, setCriticalPatients] = useState(7);
+  const [ventilators, UNUSED_setVentilators] = useState(12);
+  const [ventilatorsInUse, UNUSED_setVentilatorsInUse] = useState(9);
+  const [criticalPatients, UNUSED_setCriticalPatients] = useState(7);
   
   // Operating state
   const [activeORs] = useState(4);
@@ -49,7 +49,7 @@ export default function HospitalTerminal({ location, onClose }) {
     const interval = setInterval(() => {
       setEmergencyPatients(prev => Math.max(0, prev + Math.floor(Math.random() * 3 - 1)));
       setIcuOccupancy(prev => Math.max(0, Math.min(24, prev + Math.floor(Math.random() * 3 - 1))));
-      setVentilatorsInUse(prev => Math.max(0, Math.min(ventilators, prev + Math.floor(Math.random() * 2 - 0.5))));
+      UNUSED_setVentilatorsInUse(prev => Math.max(0, Math.min(ventilators, prev + Math.floor(Math.random() * 2 - 0.5))));
       setOxygenPressure(prev => Math.max(0, prev + (Math.random() - 0.5) * 2));
       setTemperature(20 + Math.random() * 3);
     }, 4000);

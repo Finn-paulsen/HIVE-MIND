@@ -12,7 +12,7 @@ export default function MilitaryBaseTerminal({ location, onClose }) {
   const [activeTab, setActiveTab] = useState('security');
   
   // Security state
-  const [threatLevel, setThreatLevel] = useState(2);
+  const [threatLevel, UNUSED_setThreatLevel] = useState(2);
   const [perimeter, setPerimeter] = useState({
     north: true,
     south: true,
@@ -40,7 +40,7 @@ export default function MilitaryBaseTerminal({ location, onClose }) {
   const [fuelReserves, setFuelReserves] = useState(92);
   
   // Command state
-  const [defcon, setDefcon] = useState(5);
+  const [defcon, UNUSED_setDefcon] = useState(5);
   const [commLink, setCommLink] = useState(true);
   const [siloStatus, setSiloStatus] = useState(false);
 

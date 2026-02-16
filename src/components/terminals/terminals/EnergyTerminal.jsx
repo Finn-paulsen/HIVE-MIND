@@ -20,7 +20,7 @@ export default function EnergyTerminal({ location, onClose }) {
     wind: true,
     solar: true
   });
-  const [efficiency, setEfficiency] = useState(87);
+  const [efficiency, UNUSED_setEfficiency] = useState(87);
   
   // Distribution state
   const [gridLoad, setGridLoad] = useState(72);
@@ -35,24 +35,24 @@ export default function EnergyTerminal({ location, onClose }) {
   
   // Storage state
   const [batteryCharge, setBatteryCharge] = useState(68);
-  const [batteryOutput, setBatteryOutput] = useState(250);
+  const [batteryOutput, UNUSED_setBatteryOutput] = useState(250);
   const [capacitorBank, setCapacitorBank] = useState(true);
   
   // Grid state
-  const [peakDemand, setPeakDemand] = useState(5200);
+  const [peakDemand, UNUSED_setPeakDemand] = useState(5200);
   const [currentDemand, setCurrentDemand] = useState(4100);
   const [gridStability, setGridStability] = useState(98);
   const [blackoutRisk, setBlackoutRisk] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTotalOutput(prev => Math.max(0, prev + (Math.random() - 0.5) * 100));
-      setGridLoad(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 3)));
-      setVoltage(prev => 395 + Math.random() * 10);
-      setFrequency(prev => 49.9 + Math.random() * 0.2);
-      setCurrentDemand(prev => Math.max(0, prev + (Math.random() - 0.5) * 50));
-      setGridStability(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 2)));
-      setBatteryCharge(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 1)));
+      setTotalOutput(_prev => Math.max(0, _prev + (Math.random() - 0.5) * 100));
+      setGridLoad(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 3)));
+      setVoltage(_prev => 395 + Math.random() * 10);
+      setFrequency(_prev => 49.9 + Math.random() * 0.2);
+      setCurrentDemand(_prev => Math.max(0, _prev + (Math.random() - 0.5) * 50));
+      setGridStability(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 2)));
+      setBatteryCharge(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 1)));
       
       setBlackoutRisk(gridLoad > 95 || gridStability < 80);
     }, 2000);

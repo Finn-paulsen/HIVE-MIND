@@ -13,8 +13,8 @@ export default function FireStationTerminal({ location, onClose }) {
   
   // Dispatch state
   const [activeAlarms, setActiveAlarms] = useState(2);
-  const [unitsDeployed, setUnitsDeployed] = useState(3);
-  const [availableUnits, setAvailableUnits] = useState(8);
+  const [unitsDeployed, UNUSED_setUnitsDeployed] = useState(3);
+  const [availableUnits, UNUSED_UNUSED_setAvailableUnits] = useState(8);
   const [responseTime, setResponseTime] = useState(4.2);
   
   // Apparatus state
@@ -31,22 +31,22 @@ export default function FireStationTerminal({ location, onClose }) {
   });
   
   // Personnel state
-  const [onDuty, setOnDuty] = useState(24);
-  const [available, setAvailable] = useState(21);
-  const [scbaUnits, setScbaUnits] = useState(18);
+  const [onDuty, UNUSED_setOnDuty] = useState(24);
+  const [available, UNUSED_setAvailable] = useState(21);
+  const [scbaUnits, UNUSED_setScbaUnits] = useState(18);
   
   // Equipment state
   const [waterSupply, setWaterSupply] = useState(85);
   const [foamAgent, setFoamAgent] = useState(72);
-  const [fuelLevel, setFuelLevel] = useState(68);
+  const [fuelLevel, UNUSED_setFuelLevel] = useState(68);
   const [equipmentReady, setEquipmentReady] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveAlarms(prev => Math.max(0, Math.min(10, prev + Math.floor(Math.random() * 3 - 1))));
-      setResponseTime(prev => 3 + Math.random() * 3);
-      setWaterSupply(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 2)));
-      setFoamAgent(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 1)));
+      setActiveAlarms(_prev => Math.max(0, Math.min(10, _prev + Math.floor(Math.random() * 3 - 1))));
+      setResponseTime(_prev => 3 + Math.random() * 3);
+      setWaterSupply(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 2)));
+      setFoamAgent(_prev => Math.max(0, Math.min(100, _prev + (Math.random() - 0.5) * 1)));
     }, 5000);
 
     return () => clearInterval(interval);

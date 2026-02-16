@@ -73,7 +73,7 @@ const buttonLabel = {
   control: 'Kontrollzentrum öffnen',
 };
 
-export function LocationMarkers({ onSelect, typeFilter, locations, filters }) {
+export function LocationMarkers({ typeFilter, locations, filters }) {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState(null);
 

@@ -65,6 +65,7 @@ export default function PowerPlantTerminal({ location, onClose }) {
   }, [emergencyMode]);
 
   // Control rod position directly affects temperature and flux
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => {
     const newTemp = emergencyMode ? 100 : 250 + (controlRodPosition * 10);
     const newFlux = emergencyMode ? 0 : controlRodPosition * 1.2;
@@ -76,7 +77,7 @@ export default function PowerPlantTerminal({ location, onClose }) {
     if (Math.abs(neutronFlux - newFlux) > 0.1) {
       setNeutronFlux(newFlux);
     }
-  }, [controlRodPosition, emergencyMode, coreTemp, neutronFlux]);
+  }, [controlRodPosition, emergencyMode]);
 
   const tabs = [
     { id: 'reactor', label: 'Reaktorkern' },

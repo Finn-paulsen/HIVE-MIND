@@ -34,7 +34,7 @@ body {
 
 a {
   font-weight: 500;
-  color: #0f0;
+  color: #2a4a7b;
   text-decoration: underline;
 }
 a:hover {
@@ -45,9 +45,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #1a1d1a;
-  color: #b0ffb0;
-  text-shadow: 0 0 2px #0f0, 0 0 10px #0f0;
+  background: #e6e9ef;
+  color: #222;
+  text-shadow: none;
   letter-spacing: 0.5px;
 }
 

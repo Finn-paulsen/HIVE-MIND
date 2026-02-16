@@ -46,11 +46,18 @@ function App() {
   const setShowConnections = useHiveStore(s => s.setShowConnections);
   const showRailLayer = useHiveStore(s => s.showRailLayer);
   const setShowRailLayer = useHiveStore(s => s.setShowRailLayer);
+  const showEsriBoundaries = useHiveStore(s => s.showEsriBoundaries);
+  const setShowEsriBoundaries = useHiveStore(s => s.setShowEsriBoundaries);
+  const showEsriTransportation = useHiveStore(s => s.showEsriTransportation);
+  const setShowEsriTransportation = useHiveStore(s => s.setShowEsriTransportation);
+  const showEsriTopo = useHiveStore(s => s.showEsriTopo);
+  const setShowEsriTopo = useHiveStore(s => s.setShowEsriTopo);
+  const esriOverlayOpacity = useHiveStore(s => s.esriOverlayOpacity);
+  const setEsriOverlayOpacity = useHiveStore(s => s.setEsriOverlayOpacity);
   const selectedLocation = useHiveStore(s => s.selectedLocation);
   const setSelectedLocation = useHiveStore(s => s.setSelectedLocation);
-  // Filter/Search state
+  // Filter state
   const [typeFilter, setTypeFilter] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
   // Dynamische Standortdaten
   const [locations, setLocations] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
@@ -60,7 +67,7 @@ function App() {
 
   useEffect(() => {
     setLoadingLocations(true);
-    axios.get('./src/data/locations.json')
+    axios.get('/data/locations.json')
       .then(res => {
         setLocations(res.data);
         setLoadingLocations(false);
@@ -114,7 +121,7 @@ function App() {
     return (
       <div style={{ display: 'flex', gap: 32, height: '70vh', minHeight: 500, width: '100%' }}>
         <div className="map-wrapper" style={{ flex: 2.5, height: '100%', minWidth: 0 }}>
-          {/* Filter & Suche UI */}
+          {/* Filter UI */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
             <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ padding: 4, borderRadius: 4, border: '1px solid #b0b7c3' }}>
               <option value="">Alle Typen</option>
@@ -136,13 +143,6 @@ function App() {
               <option value="university">Universitäten</option>
               <option value="control">Leitstellen</option>
             </select>
-            <input
-              type="text"
-              placeholder="Suche nach Name oder Ort..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ padding: 4, borderRadius: 4, border: '1px solid #b0b7c3', flex: 1 }}
-            />
           </div>
           {loadingLocations ? (
             <div style={{ padding: 16 }}>Lade Standorte…</div>
@@ -153,15 +153,39 @@ function App() {
               center={[20, 0]}
               zoom={2}
               minZoom={2}
-              maxZoom={8}
+              maxZoom={19}
               style={{ height: '100%', width: '100%', borderRadius: '8px' }}
               scrollWheelZoom={true}
               zoomControl={true}
               attributionControl={false}
             >
+              {/* Basis: Satellitenbild */}
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution="Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
               />
+              {/* Esri Overlays */}
+              {showEsriBoundaries && (
+                <TileLayer
+                  url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                  opacity={esriOverlayOpacity}
+                  attribution="Esri Boundaries & Places"
+                />
+              )}
+              {showEsriTransportation && (
+                <TileLayer
+                  url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
+                  opacity={esriOverlayOpacity}
+                  attribution="Esri Transportation"
+                />
+              )}
+              {showEsriTopo && (
+                <TileLayer
+                  url="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                  opacity={esriOverlayOpacity}
+                  attribution="Esri Topo"
+                />
+              )}
               {showRailLayer && (
                 <TileLayer
                   url="https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
@@ -178,7 +202,7 @@ function App() {
                   }))}
                 />
               )}
-              <LocationMarkers onSelect={setSelectedLocation} typeFilter={typeFilter} searchTerm={searchTerm} locations={locations} />
+              <LocationMarkers onSelect={setSelectedLocation} typeFilter={typeFilter} locations={locations} />
               <StationMarkers />
             </MapContainer>
           )}
@@ -200,6 +224,34 @@ function App() {
             label={<Typography color="primary">Heatmap anzeigen</Typography>}
             sx={{ mt: 1 }}
           />
+          <FormControlLabel
+            control={<Checkbox checked={showEsriBoundaries} onChange={e => setShowEsriBoundaries(e.target.checked)} color="primary" />}
+            label={<Typography color="primary">Grenzen & Orte (Esri)</Typography>}
+            sx={{ mt: 1 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={showEsriTransportation} onChange={e => setShowEsriTransportation(e.target.checked)} color="primary" />}
+            label={<Typography color="primary">Straßen & Bahnlinien (Esri)</Typography>}
+            sx={{ mt: 1 }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={showEsriTopo} onChange={e => setShowEsriTopo(e.target.checked)} color="primary" />}
+            label={<Typography color="primary">Topografie (Esri)</Typography>}
+            sx={{ mt: 1 }}
+          />
+          <div style={{ marginTop: 12 }}>
+            <Typography variant="body2" color="primary" gutterBottom>Overlay-Transparenz</Typography>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={esriOverlayOpacity}
+              onChange={e => setEsriOverlayOpacity(Number(e.target.value))}
+              style={{ width: '100%' }}
+            />
+            <Typography variant="caption" color="text.secondary">{Math.round(esriOverlayOpacity * 100)}%</Typography>
+          </div>
         </div>
       </div>
     );

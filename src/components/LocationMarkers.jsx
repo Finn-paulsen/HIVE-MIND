@@ -32,14 +32,10 @@ const statusLabel = {
   offline: 'Offline',
 };
 
-export function LocationMarkers({ onSelect, typeFilter, searchTerm, locations }) {
-  // Filter/Seach logic
+export function LocationMarkers({ onSelect, typeFilter, locations }) {
+  // Nur nach Typ filtern
   const filtered = (locations || []).filter(loc => {
-    const matchesType = !typeFilter || loc.type === typeFilter;
-    const matchesSearch = !searchTerm ||
-      loc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (loc.description && loc.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesType && matchesSearch;
+    return !typeFilter || loc.type === typeFilter;
   });
   return (
     <MarkerClusterGroup>

@@ -51,19 +51,19 @@ export default function BaseTerminal({
 
   const getStatusLabel = () => {
     switch (status) {
-      case 'active': return 'AKTIV';
-      case 'critical': return 'KRITISCH';
+      case 'active': return 'ACTIVE';
+      case 'critical': return 'CRITICAL';
       case 'offline': return 'OFFLINE';
-      default: return 'UNBEKANNT';
+      default: return 'UNKNOWN';
     }
   };
 
   return (
     <div className={`terminal-modal-content ${isPowerOn ? 'terminal-power-on' : ''}`}>
-      {/* Header */}
+      {/* Windows-style Header */}
       <div className="terminal-header">
         <h1 className="terminal-title">
-          {title}
+          Facility Control Panel - {title}
           <span className={`terminal-status-badge ${getStatusClass()}`}>
             {getStatusLabel()}
           </span>
@@ -71,6 +71,57 @@ export default function BaseTerminal({
         <div className="terminal-timestamp">
           {formatTime(currentTime)}
         </div>
+      </div>
+
+      {/* Menu Bar */}
+      <div style={{ 
+        display: 'flex', 
+        gap: 0, 
+        padding: '2px 8px', 
+        background: '#F0F0F0',
+        borderBottom: '1px solid #CCCCCC',
+        fontSize: '11px'
+      }}>
+        <button style={{
+          padding: '4px 12px',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'Arial, Tahoma, sans-serif',
+          fontSize: '11px'
+        }}>File</button>
+        <button style={{
+          padding: '4px 12px',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'Arial, Tahoma, sans-serif',
+          fontSize: '11px'
+        }}>Edit</button>
+        <button style={{
+          padding: '4px 12px',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'Arial, Tahoma, sans-serif',
+          fontSize: '11px'
+        }}>Controls</button>
+        <button style={{
+          padding: '4px 12px',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'Arial, Tahoma, sans-serif',
+          fontSize: '11px'
+        }}>Reports</button>
+        <button style={{
+          padding: '4px 12px',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'Arial, Tahoma, sans-serif',
+          fontSize: '11px'
+        }}>Help</button>
       </div>
 
       {/* Tabs */}
@@ -98,14 +149,14 @@ export default function BaseTerminal({
       {/* Footer */}
       <div className="terminal-footer">
         <div className="terminal-system-info">
-          <span>HIVE-MIND v2.0</span>
+          <span>Infrastructure Monitoring System v2.1</span>
           <span>|</span>
-          <span>SECURE CONNECTION</span>
+          <span>Status: OK</span>
           <span>|</span>
-          <span>ENCRYPTION: AES-256</span>
+          <span>Last Update: {new Date().toLocaleTimeString()}</span>
         </div>
         <button className="terminal-close-btn" onClick={onClose}>
-          [ESC] SCHLIESSEN
+          Close
         </button>
       </div>
     </div>

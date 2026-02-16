@@ -145,7 +145,8 @@ export default function PowerPlantTerminal({ location, onClose }) {
     }
   };
 
-  // Initialize saved state on mount
+  // Initialize saved state on mount with initial values
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const initialState = {
       coreTemp,

@@ -53,24 +53,30 @@ export default function PowerPlantTerminal({ location, onClose }) {
         
         setTurbineRPM(prev => prev + (Math.random() - 0.5) * 10);
         setSteamPressure(prev => prev + (Math.random() - 0.5) * 2);
-        setGeneratorFreq(prev => 49.9 + Math.random() * 0.2);
-        setVibrationLevel(prev => 2 + Math.random() * 1);
+        setGeneratorFreq(49.9 + Math.random() * 0.2);
+        setVibrationLevel(2 + Math.random() * 1);
         
         setPowerOutput(prev => prev + (Math.random() - 0.5) * 20);
-        setGridVoltage(prev => 395 + Math.random() * 10);
+        setGridVoltage(395 + Math.random() * 10);
       }
     }, 2000);
 
     return () => clearInterval(interval);
   }, [emergencyMode]);
 
-  // Handle control rod changes
+  // Control rod position directly affects temperature and flux
   useEffect(() => {
-    // Control rods affect neutron flux and temperature
-    const targetTemp = 250 + (controlRodPosition * 10);
-    setCoreTemp(targetTemp);
-    setNeutronFlux(controlRodPosition * 1.2);
-  }, [controlRodPosition]);
+    const newTemp = emergencyMode ? 100 : 250 + (controlRodPosition * 10);
+    const newFlux = emergencyMode ? 0 : controlRodPosition * 1.2;
+    
+    // Only update if values changed significantly
+    if (Math.abs(coreTemp - newTemp) > 0.1) {
+      setCoreTemp(newTemp);
+    }
+    if (Math.abs(neutronFlux - newFlux) > 0.1) {
+      setNeutronFlux(newFlux);
+    }
+  }, [controlRodPosition, emergencyMode, coreTemp, neutronFlux]);
 
   const tabs = [
     { id: 'reactor', label: 'Reaktorkern' },

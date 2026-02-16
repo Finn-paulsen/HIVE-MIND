@@ -33,6 +33,7 @@ import { LocationMarkers } from './components/LocationMarkers';
 import { HeatmapOverlay } from './components/HeatmapOverlay';
 import { LocationConnections } from './components/LocationConnections';
 import { StationMarkers } from './components/StationMarkers';
+import { FilterPanel } from './components/FilterPanel';
 
 import 'leaflet/dist/leaflet.css';
 import './App.css';
@@ -56,7 +57,14 @@ function App() {
   const setEsriOverlayOpacity = useHiveStore(s => s.setEsriOverlayOpacity);
   const selectedLocation = useHiveStore(s => s.selectedLocation);
   const setSelectedLocation = useHiveStore(s => s.setSelectedLocation);
-  // Filter state
+  // Filter state - NEW multi-filter state
+  const [filters, setFilters] = useState({
+    types: [],
+    statuses: [],
+    countries: [],
+    search: ''
+  });
+  // Legacy filter support
   const [typeFilter, setTypeFilter] = useState('');
   // Dynamische Standortdaten
   const [locations, setLocations] = useState([]);
@@ -77,6 +85,37 @@ function App() {
         setLoadingLocations(false);
       });
   }, []);
+
+  // Calculate filtered count for display
+  const getFilteredLocations = () => {
+    return (locations || []).filter(loc => {
+      // Type filter
+      if (filters.types.length > 0 && !filters.types.includes(loc.type)) {
+        return false;
+      }
+      // Status filter
+      if (filters.statuses.length > 0 && !filters.statuses.includes(loc.status)) {
+        return false;
+      }
+      // Country filter
+      if (filters.countries.length > 0 && !filters.countries.includes(loc.country)) {
+        return false;
+      }
+      // Search filter
+      if (filters.search && filters.search.trim() !== '') {
+        const searchLower = filters.search.toLowerCase();
+        const matchesName = loc.name.toLowerCase().includes(searchLower);
+        const matchesDescription = loc.description?.toLowerCase().includes(searchLower);
+        if (!matchesName && !matchesDescription) {
+          return false;
+        }
+      }
+      return true;
+    });
+  };
+
+  const filteredLocations = getFilteredLocations();
+
 
   // Panel für Standortsteuerung
   function renderControlPanel() {
@@ -121,40 +160,24 @@ function App() {
     return (
       <div style={{ display: 'flex', gap: 32, height: '70vh', minHeight: 500, width: '100%' }}>
         <div className="map-wrapper" style={{ flex: 2.5, height: '100%', minWidth: 0 }}>
-          {/* Filter UI */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
-            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ padding: 4, borderRadius: 4, border: '1px solid #b0b7c3' }}>
-              <option value="">Alle Typen</option>
-              <option value="power">Kraftwerke</option>
-              <option value="airport">Flughäfen</option>
-              <option value="server">Rechenzentren</option>
-              <option value="gov">Behörden</option>
-              <option value="water">Wasserwerke</option>
-              <option value="base">Militärbasen</option>
-              <option value="hospital">Krankenhäuser</option>
-              <option value="fire">Feuerwachen</option>
-              <option value="police">Polizei</option>
-              <option value="school">Schulen</option>
-              <option value="cityhall">Rathäuser</option>
-              <option value="bridge">Brücken</option>
-              <option value="port">Häfen</option>
-              <option value="energy">Umspannwerke</option>
-              <option value="metro">U-Bahn</option>
-              <option value="university">Universitäten</option>
-              <option value="control">Leitstellen</option>
-            </select>
-          </div>
+          {/* New Filter Panel */}
+          <FilterPanel 
+            filters={filters}
+            onFilterChange={setFilters}
+            totalCount={locations.length}
+            filteredCount={filteredLocations.length}
+          />
           {loadingLocations ? (
             <div style={{ padding: 16 }}>Lade Standorte…</div>
           ) : locationsError ? (
             <div style={{ color: 'red', padding: 16 }}>{locationsError}</div>
           ) : (
             <MapContainer
-              center={[20, 0]}
-              zoom={2}
+              center={[50, 10]}
+              zoom={4}
               minZoom={2}
               maxZoom={19}
-              style={{ height: '100%', width: '100%', borderRadius: '8px' }}
+              style={{ height: 'calc(100% - 240px)', width: '100%', borderRadius: '8px' }}
               scrollWheelZoom={true}
               zoomControl={true}
               attributionControl={false}
@@ -196,13 +219,13 @@ function App() {
               {showConnections && <LocationConnections locations={locations} />}
               {showHeatmap && (
                 <HeatmapOverlay
-                  points={locations.map(l => ({
+                  points={filteredLocations.map(l => ({
                     position: l.position,
                     intensity: l.status === 'critical' ? 1 : 0.3
                   }))}
                 />
               )}
-              <LocationMarkers onSelect={setSelectedLocation} typeFilter={typeFilter} locations={locations} />
+              <LocationMarkers onSelect={setSelectedLocation} locations={locations} filters={filters} />
               <StationMarkers />
             </MapContainer>
           )}

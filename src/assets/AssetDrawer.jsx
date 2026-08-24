@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, Divider, IconButton, Typography } from '@mui/material';
+import { Box, Button, Chip, Divider, IconButton, LinearProgress, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TerminalIcon from '@mui/icons-material/Terminal';
 import { AUDIT_EVENTS, logEvent } from '../audit/auditLogger';
 import { simulatedDelay } from '../ui/delays';
+
+function getStatusMeta(status = 'active') {
+  switch (status) {
+    case 'active': return { label: 'Active', color: '#006600', background: '#E8F5E9' };
+    case 'critical': return { label: 'Critical', color: '#CC0000', background: '#FDECEC' };
+    case 'offline': return { label: 'Offline', color: '#666666', background: '#F5F5F5' };
+    default: return { label: 'Maintenance', color: '#CC6600', background: '#FFF3E0' };
+  }
+}
 
 function getConfidenceMeta(confidence = 0) {
   if (confidence >= 0.75) {
@@ -29,7 +40,7 @@ function PlaceholderLine({ width = '100%', height = 12 }) {
   );
 }
 
-export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
+export function AssetDrawer({ asset, open, onClose, onOpenTerminal, isLoading = false }) {
   const [readySessionKey, setReadySessionKey] = useState('');
   const expectedReadyKey = useMemo(
     () => (open && asset ? `${asset.id}:${asset.updatedAt || 'na'}` : ''),
@@ -66,6 +77,7 @@ export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
   const showContent = Boolean(expectedReadyKey) && readySessionKey === expectedReadyKey && !isLoading;
   const loading = open && asset && !showContent;
   const confidenceMeta = getConfidenceMeta(asset?.confidence);
+  const statusMeta = getStatusMeta(asset?.status);
 
   const handleClose = () => {
     setReadySessionKey('');
@@ -129,13 +141,13 @@ export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
                 sx={{ height: 22, borderRadius: 0, backgroundColor: '#E6F0FA', fontSize: '11px' }}
               />
               <Chip
-                label={`${confidenceMeta.label} Confidence`}
+                label={statusMeta.label}
                 size="small"
                 sx={{
                   height: 22,
                   borderRadius: 0,
-                  backgroundColor: confidenceMeta.background,
-                  color: confidenceMeta.color,
+                  backgroundColor: statusMeta.background,
+                  color: statusMeta.color,
                   fontSize: '11px',
                   fontWeight: 'bold',
                 }}
@@ -151,9 +163,22 @@ export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
             <Typography sx={{ fontSize: '11px', mb: 0.75 }}>
               <b>Last Updated:</b> {new Date(asset.updatedAt).toLocaleString('en-GB')}
             </Typography>
-            <Typography sx={{ fontSize: '11px', mb: 0.75 }}>
-              <b>Confidence Score:</b> {Math.round((asset.confidence || 0) * 100)}%
+            <Typography sx={{ fontSize: '11px', mb: 0.5 }}>
+              <b>Confidence:</b> {Math.round((asset.confidence || 0) * 100)}%
             </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={(asset.confidence || 0) * 100}
+              sx={{
+                mb: 1.25,
+                height: 5,
+                borderRadius: 0,
+                backgroundColor: '#E0E0E0',
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: confidenceMeta.color,
+                },
+              }}
+            />
             {asset.description && (
               <Typography sx={{ fontSize: '11px', mb: 1.5 }}>{asset.description}</Typography>
             )}
@@ -161,7 +186,7 @@ export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
             <Divider sx={{ my: 1.5 }} />
 
             <Typography sx={{ fontSize: '11px', fontWeight: 'bold', mb: 1 }}>Tags</Typography>
-            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1.5 }}>
               {(asset.tags || []).map(tag => (
                 <Chip
                   key={tag}
@@ -170,6 +195,31 @@ export function AssetDrawer({ asset, open, onClose, isLoading = false }) {
                   sx={{ height: 22, borderRadius: 0, fontSize: '11px', backgroundColor: '#F5F5F5' }}
                 />
               ))}
+            </Box>
+
+            <Divider sx={{ my: 1.5 }} />
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="small"
+                startIcon={<DashboardIcon />}
+                onClick={() => onOpenTerminal && onOpenTerminal(asset)}
+                sx={{ borderRadius: 0, fontSize: '11px', textTransform: 'none', borderColor: '#CCCCCC', color: '#003366', justifyContent: 'flex-start' }}
+              >
+                Open Control Panel
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                size="small"
+                startIcon={<TerminalIcon />}
+                onClick={() => onOpenTerminal && onOpenTerminal(asset)}
+                sx={{ borderRadius: 0, fontSize: '11px', textTransform: 'none', backgroundColor: '#003366', justifyContent: 'flex-start' }}
+              >
+                Connect Terminal
+              </Button>
             </Box>
           </>
         )}

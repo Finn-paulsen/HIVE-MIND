@@ -255,7 +255,6 @@ export function FilterPanel({ filters, onFilterChange, totalCount, filteredCount
                 fontSize: '11px',
                 fontFamily: 'Arial, Tahoma, sans-serif',
                 textTransform: 'none',
-                mb: 2,
                 '&:hover': {
                   backgroundColor: '#E6F2FF',
                   borderColor: '#0066CC'
@@ -265,18 +264,6 @@ export function FilterPanel({ filters, onFilterChange, totalCount, filteredCount
               Reset All
             </Button>
           )}
-
-          {/* Results Counter */}
-          <Box sx={{ 
-            mt: 2, 
-            pt: 2, 
-            borderTop: '1px solid #CCCCCC',
-            textAlign: 'center'
-          }}>
-            <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 'bold', color: '#003366' }}>
-              Results: {filteredCount} of {totalCount} shown
-            </Typography>
-          </Box>
         </Box>
       </Collapse>
     </Paper>

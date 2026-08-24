@@ -2,6 +2,44 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useHiveStore } from './state/hive';
 import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
+import Modal from 'react-modal';
+import AirportTerminal from './components/terminals/terminals/AirportTerminal';
+import PowerPlantTerminal from './components/terminals/terminals/PowerPlantTerminal';
+import HospitalTerminal from './components/terminals/terminals/HospitalTerminal';
+import PoliceStationTerminal from './components/terminals/terminals/PoliceStationTerminal';
+import MilitaryBaseTerminal from './components/terminals/terminals/MilitaryBaseTerminal';
+import ServerFarmTerminal from './components/terminals/terminals/ServerFarmTerminal';
+import WaterTreatmentTerminal from './components/terminals/terminals/WaterTreatmentTerminal';
+import EnergyTerminal from './components/terminals/terminals/EnergyTerminal';
+import GovernmentTerminal from './components/terminals/terminals/GovernmentTerminal';
+import FireStationTerminal from './components/terminals/terminals/FireStationTerminal';
+import PortTerminal from './components/terminals/terminals/PortTerminal';
+import BridgeTerminal from './components/terminals/terminals/BridgeTerminal';
+import MetroTerminal from './components/terminals/terminals/MetroTerminal';
+import SchoolTerminal from './components/terminals/terminals/SchoolTerminal';
+import UniversityTerminal from './components/terminals/terminals/UniversityTerminal';
+import CityHallTerminal from './components/terminals/terminals/CityHallTerminal';
+import ControlTerminal from './components/terminals/terminals/ControlTerminal';
+
+const CATEGORY_TERMINAL_MAP = {
+  airport: AirportTerminal,
+  power: PowerPlantTerminal,
+  hospital: HospitalTerminal,
+  police: PoliceStationTerminal,
+  military: MilitaryBaseTerminal,
+  datacenter: ServerFarmTerminal,
+  water: WaterTreatmentTerminal,
+  energy: EnergyTerminal,
+  government: GovernmentTerminal,
+  fire: FireStationTerminal,
+  port: PortTerminal,
+  bridge: BridgeTerminal,
+  metro: MetroTerminal,
+  school: SchoolTerminal,
+  university: UniversityTerminal,
+  cityhall: CityHallTerminal,
+  control: ControlTerminal,
+};
 
 function jsonToCsv(data) {
   if (!data || !data.length) return '';
@@ -27,7 +65,6 @@ function downloadCsv(data, filename = 'standorte.csv') {
 import { FaBrain } from 'react-icons/fa';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Modal from 'react-modal';
 
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
 import { LocationMarkers } from './components/LocationMarkers';
@@ -126,6 +163,7 @@ function App() {
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [locationsError, setLocationsError] = useState(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [terminalAsset, setTerminalAsset] = useState(null);
 
   useEffect(() => {
     axios.get('/data/locations.json')
@@ -209,7 +247,7 @@ function App() {
   function renderMainContent() {
     return (
       <div style={{ display: 'flex', gap: 20, height: '70vh', minHeight: 500, width: '100%' }}>
-        <div className="map-wrapper" style={{ flex: 2.5, minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', padding: 12, background: '#FFFFFF' }}>
+        <div className="map-wrapper" style={{ flex: 3, minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', padding: 12, background: '#FFFFFF' }}>
           <SearchBar
             assets={allAssets}
             onSelectAsset={handleSelectAsset}
@@ -287,7 +325,12 @@ function App() {
         </div>
 
         <div style={{ flex: 1, minWidth: 290, background: '#F7F9FB', border: '1px solid #CCCCCC', padding: 0, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <AssetDrawer asset={selectedAsset} open={Boolean(selectedAsset)} onClose={handleCloseAssetDrawer} />
+          <AssetDrawer
+            asset={selectedAsset}
+            open={Boolean(selectedAsset)}
+            onClose={handleCloseAssetDrawer}
+            onOpenTerminal={setTerminalAsset}
+          />
           <div style={{ padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <LayerManager activeLayers={activeLayers} onToggle={handleToggleEnterpriseLayer} />
             <div style={{ border: '1px solid #CCCCCC', background: '#FFFFFF', padding: 16 }}>
@@ -343,6 +386,22 @@ function App() {
     );
   }
 
+  function renderTerminal() {
+    if (!terminalAsset) {
+      return null;
+    }
+    const TerminalComponent = CATEGORY_TERMINAL_MAP[terminalAsset.category];
+    if (!TerminalComponent) {
+      return null;
+    }
+    return (
+      <TerminalComponent
+        location={terminalAsset}
+        onClose={() => setTerminalAsset(null)}
+      />
+    );
+  }
+
   return (
     <div className="hive-mind-app">
       <div className="icon-container" onClick={() => setModalIsOpen(true)} title="Open Infrastructure Monitoring System">
@@ -358,19 +417,12 @@ function App() {
         <div className="modal-header">
           <div className="modal-header-title">
             <h2>
-              🏛️ INFRASTRUCTURE MONITORING SYSTEM - v2.1
+              Operations Console
             </h2>
             <button className="close-btn" onClick={() => setModalIsOpen(false)}>×</button>
           </div>
           <div className="modal-header-subtitle">
-            Department of Infrastructure & Public Works
-          </div>
-          <div className="modal-header-menu">
-            <button className="menu-item">File</button>
-            <button className="menu-item">View</button>
-            <button className="menu-item">Tools</button>
-            <button className="menu-item">Reports</button>
-            <button className="menu-item">Help</button>
+            System Operations Layer
           </div>
         </div>
         {Array.isArray(locations) && locations.some(l => l.status === 'critical') && (
@@ -387,10 +439,11 @@ function App() {
           {renderMainContent()}
         </div>
         <div className="modal-status-bar">
-          <span>User: Administrator | Status: CONNECTED</span>
-          <span>{displayedLocations.length} Facilities | {new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</span>
+          <span>Operator: Administrator | Status: CONNECTED</span>
+          <span>{displayedLocations.length} Assets | {new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</span>
         </div>
       </Modal>
+      {renderTerminal()}
       <ToastContainer
         position="top-right"
         autoClose={3000}

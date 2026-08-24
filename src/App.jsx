@@ -1,16 +1,15 @@
-
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useHiveStore } from './state/hive';
-import { Button, Paper, Checkbox, FormControlLabel, Typography, IconButton, Alert } from '@mui/material';
-// Hilfsfunktion: JSON zu CSV
+import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
+
 function jsonToCsv(data) {
   if (!data || !data.length) return '';
   const replacer = (key, value) => (value === null ? '' : value);
   const header = Object.keys(data[0]);
   return [
     header.join(','),
-    ...data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+    ...data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(',')),
   ].join('\r\n');
 }
 
@@ -24,24 +23,76 @@ function downloadCsv(data, filename = 'standorte.csv') {
   a.click();
   window.URL.revokeObjectURL(url);
 }
-import CloseIcon from '@mui/icons-material/Close';
+
 import { FaBrain } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from 'react-modal';
 
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
 import { LocationMarkers } from './components/LocationMarkers';
 import { HeatmapOverlay } from './components/HeatmapOverlay';
 import { LocationConnections } from './components/LocationConnections';
 import { StationMarkers } from './components/StationMarkers';
 import { FilterPanel } from './components/FilterPanel';
+import { AssetDrawer } from './assets/AssetDrawer';
+import { SEED_ASSETS, normalizeLocation } from './data/assets';
+import { LayerManager } from './map/LayerManager';
+import { SearchBar } from './search/SearchBar';
 
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
-
 Modal.setAppElement('#root');
+
+const LAYER_CATEGORY_MAP = {
+  airport: 'airports',
+  rail: 'rail',
+  metro: 'rail',
+  bank: 'banks',
+  energy: 'energy',
+  datacenter: 'datacenters',
+  power: 'power',
+  water: 'water',
+  hospital: 'hospital',
+  police: 'police',
+  military: 'military',
+};
+
+function getLocationLayerKey(location) {
+  const normalized = normalizeLocation(location);
+  return LAYER_CATEGORY_MAP[normalized.category] || null;
+}
+
+function isLayerEnabled(activeLayers, layerKey) {
+  if (!layerKey) {
+    return true;
+  }
+
+  return activeLayers instanceof Set ? activeLayers.has(layerKey) : Boolean(activeLayers?.[layerKey]);
+}
+
+function MapViewportController() {
+  const map = useMap();
+  const mapFocusTarget = useHiveStore(state => state.mapFocusTarget);
+  const temporaryPin = useHiveStore(state => state.temporaryPin);
+
+  useEffect(() => {
+    if (!mapFocusTarget?.center) {
+      return;
+    }
+
+    map.flyTo(mapFocusTarget.center, mapFocusTarget.zoom ?? Math.max(map.getZoom(), 7), {
+      duration: 1.2,
+    });
+  }, [map, mapFocusTarget]);
+
+  return temporaryPin ? (
+    <CircleMarker center={temporaryPin.position} radius={8} pathOptions={{ color: '#CC0000', fillColor: '#CC0000', fillOpacity: 0.7 }}>
+      <Popup>{temporaryPin.label}</Popup>
+    </CircleMarker>
+  ) : null;
+}
 
 function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -57,26 +108,26 @@ function App() {
   const setShowEsriTopo = useHiveStore(s => s.setShowEsriTopo);
   const esriOverlayOpacity = useHiveStore(s => s.esriOverlayOpacity);
   const setEsriOverlayOpacity = useHiveStore(s => s.setEsriOverlayOpacity);
-  const selectedLocation = useHiveStore(s => s.selectedLocation);
   const setSelectedLocation = useHiveStore(s => s.setSelectedLocation);
-  // Filter state - NEW multi-filter state
+  const selectedAsset = useHiveStore(s => s.selectedAsset);
+  const setSelectedAsset = useHiveStore(s => s.setSelectedAsset);
+  const activeLayers = useHiveStore(s => s.activeLayers);
+  const toggleLayer = useHiveStore(s => s.toggleLayer);
+  const setMapFocusTarget = useHiveStore(s => s.setMapFocusTarget);
+  const setTemporaryPin = useHiveStore(s => s.setTemporaryPin);
+
   const [filters, setFilters] = useState({
     types: [],
     statuses: [],
     countries: [],
-    search: ''
+    search: '',
   });
-  // Legacy filter support (kept for backward compatibility)
-  // const [typeFilter, setTypeFilter] = useState('');
-  // Dynamische Standortdaten
   const [locations, setLocations] = useState([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [locationsError, setLocationsError] = useState(null);
-  // Heatmap
   const [showHeatmap, setShowHeatmap] = useState(false);
 
   useEffect(() => {
-    setLoadingLocations(true);
     axios.get('/data/locations.json')
       .then(res => {
         setLocations(res.data);
@@ -88,212 +139,204 @@ function App() {
       });
   }, []);
 
-  // Calculate filtered count for display
-  const getFilteredLocations = () => {
-    return (locations || []).filter(loc => {
-      // Type filter
-      if (filters.types.length > 0 && !filters.types.includes(loc.type)) {
+  const filteredLocations = useMemo(() => (locations || []).filter(loc => {
+    if (filters.types.length > 0 && !filters.types.includes(loc.type)) {
+      return false;
+    }
+    if (filters.statuses.length > 0 && !filters.statuses.includes(loc.status)) {
+      return false;
+    }
+    if (filters.countries.length > 0 && !filters.countries.includes(loc.country)) {
+      return false;
+    }
+    if (filters.search && filters.search.trim() !== '') {
+      const searchLower = filters.search.toLowerCase();
+      const matchesName = loc.name.toLowerCase().includes(searchLower);
+      const matchesDescription = loc.description?.toLowerCase().includes(searchLower);
+      if (!matchesName && !matchesDescription) {
         return false;
       }
-      // Status filter
-      if (filters.statuses.length > 0 && !filters.statuses.includes(loc.status)) {
-        return false;
-      }
-      // Country filter
-      if (filters.countries.length > 0 && !filters.countries.includes(loc.country)) {
-        return false;
-      }
-      // Search filter
-      if (filters.search && filters.search.trim() !== '') {
-        const searchLower = filters.search.toLowerCase();
-        const matchesName = loc.name.toLowerCase().includes(searchLower);
-        const matchesDescription = loc.description?.toLowerCase().includes(searchLower);
-        if (!matchesName && !matchesDescription) {
-          return false;
-        }
-      }
-      return true;
+    }
+    return true;
+  }), [filters, locations]);
+
+  const displayedLocations = useMemo(
+    () => filteredLocations.filter(location => isLayerEnabled(activeLayers, getLocationLayerKey(location))),
+    [activeLayers, filteredLocations],
+  );
+
+  const allAssets = useMemo(() => {
+    const merged = new Map();
+    [...SEED_ASSETS, ...locations.map(normalizeLocation)].forEach(asset => {
+      merged.set(asset.id, asset);
     });
+    return [...merged.values()];
+  }, [locations]);
+
+  const handleSelectLocation = (location) => {
+    setSelectedLocation(location);
+    setSelectedAsset(normalizeLocation(location));
+    setTemporaryPin(null);
   };
 
-  const filteredLocations = getFilteredLocations();
+  const handleSelectAsset = (asset) => {
+    setSelectedAsset(asset);
+    const matchedLocation = locations.find(location => location.id === asset.id || location.name === asset.name);
+    setSelectedLocation(matchedLocation || null);
+    setTemporaryPin(null);
+    setMapFocusTarget({ center: asset.coordinates, zoom: 7 });
+  };
 
+  const handleSelectCoordinates = ({ lat, lon }) => {
+    setSelectedLocation(null);
+    setSelectedAsset(null);
+    setTemporaryPin({ position: [lat, lon], label: `${lat.toFixed(4)}, ${lon.toFixed(4)}` });
+    setMapFocusTarget({ center: [lat, lon], zoom: 8 });
+  };
 
-  // Panel für Standortsteuerung
-  function renderControlPanel() {
-    if (!selectedLocation) {
-      return <Typography sx={{ fontSize: '11px', color: '#666666', fontStyle: 'italic' }}>Select a facility on the map…</Typography>;
+  const handleToggleEnterpriseLayer = (key) => {
+    toggleLayer(key);
+    if (key === 'rail') {
+      setShowRailLayer(!activeLayers?.rail);
     }
-    // Authentische Werte für ein Kraftwerk
-    const fakeData = selectedLocation.type === 'power' ? {
-      leistung: '1200 MW',
-      temperatur: '320 °C',
-      druck: '155 bar',
-      status: selectedLocation.status === 'active' ? 'Online' : (selectedLocation.status === 'critical' ? 'Warning' : 'Offline'),
-      letzteWartung: '12.01.2026',
-    } : null;
-    return (
-      <Paper elevation={0} sx={{ p: 2, mb: 2, position: 'relative', border: '1px solid #CCCCCC', borderRadius: 0, backgroundColor: '#FFFFFF' }}>
-        <IconButton size="small" onClick={() => setSelectedLocation(null)} sx={{ position: 'absolute', top: 4, right: 4, width: 20, height: 20 }}>
-          <CloseIcon fontSize="small" />
-        </IconButton>
-        <Typography variant="h6" sx={{ mb: 1, fontSize: '12px', fontWeight: 'bold', color: '#003366' }}>{selectedLocation.name}</Typography>
-        <Typography sx={{ fontSize: '11px', color: '#000000' }}>Status: <b style={{ color: selectedLocation.status === 'critical' ? '#CC0000' : '#006600' }}>{selectedLocation.status.toUpperCase()}</b></Typography>
-        <Typography sx={{ my: 1, fontSize: '11px' }}>{selectedLocation.description}</Typography>
-        {fakeData && (
-          <>
-            <Typography variant="body2" sx={{ mt: 2, mb: 0.5, fontSize: '11px' }}>Leistung: <b>{fakeData.leistung}</b></Typography>
-            <Typography variant="body2" sx={{ fontSize: '11px' }}>Temperatur: <b>{fakeData.temperatur}</b></Typography>
-            <Typography variant="body2" sx={{ fontSize: '11px' }}>Druck: <b>{fakeData.druck}</b></Typography>
-            <Typography variant="body2" sx={{ fontSize: '11px' }}>Status: <b style={{ color: '#003366' }}>{fakeData.status}</b></Typography>
-            <Typography variant="body2" sx={{ fontSize: '11px' }}>Letzte Wartung: <b>{fakeData.letzteWartung}</b></Typography>
-          </>
-        )}
-        <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-          <Button 
-            variant="contained" 
-            size="small" 
-            onClick={() => alert('KraftwerkControl wird geöffnet...')}
-            sx={{
-              backgroundColor: '#003366',
-              color: '#FFFFFF',
-              borderRadius: 0,
-              fontSize: '11px',
-              fontFamily: 'Arial, Tahoma, sans-serif',
-              textTransform: 'none',
-              boxShadow: '1px 1px 0 rgba(0,0,0,0.2)',
-              '&:hover': {
-                backgroundColor: '#0066CC'
-              }
-            }}
-          >
-            Open Control Panel
-          </Button>
-        </div>
-      </Paper>
-    );
-  }
+  };
 
-  // Platzhalter für andere Module
-  // Nur Karte und Steuerungspanel
+  const handleCloseAssetDrawer = () => {
+    setSelectedAsset(null);
+    setSelectedLocation(null);
+  };
+
   function renderMainContent() {
     return (
-      <div style={{ display: 'flex', gap: 32, height: '70vh', minHeight: 500, width: '100%' }}>
-        <div className="map-wrapper" style={{ flex: 2.5, height: '100%', minWidth: 0 }}>
-          {/* New Filter Panel */}
-          <FilterPanel 
+      <div style={{ display: 'flex', gap: 20, height: '70vh', minHeight: 500, width: '100%' }}>
+        <div className="map-wrapper" style={{ flex: 2.5, minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', padding: 12, background: '#FFFFFF' }}>
+          <SearchBar
+            assets={allAssets}
+            onSelectAsset={handleSelectAsset}
+            onSelectCoordinates={handleSelectCoordinates}
+          />
+          <FilterPanel
             filters={filters}
             onFilterChange={setFilters}
             totalCount={locations.length}
-            filteredCount={filteredLocations.length}
+            filteredCount={displayedLocations.length}
           />
           {loadingLocations ? (
             <div style={{ padding: 16 }}>Lade Standorte…</div>
           ) : locationsError ? (
             <div style={{ color: 'red', padding: 16 }}>{locationsError}</div>
           ) : (
-            <MapContainer
-              center={[50, 10]}
-              zoom={4}
-              minZoom={2}
-              maxZoom={19}
-              style={{ height: 'calc(100% - 240px)', width: '100%', borderRadius: '8px' }}
-              scrollWheelZoom={true}
-              zoomControl={true}
-              attributionControl={false}
-            >
-              {/* Basis: Satellitenbild */}
-              <TileLayer
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                attribution="Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-              />
-              {/* Esri Overlays */}
-              {showEsriBoundaries && (
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <MapContainer
+                center={[50, 10]}
+                zoom={4}
+                minZoom={2}
+                maxZoom={19}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom
+                zoomControl
+                attributionControl={false}
+              >
                 <TileLayer
-                  url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
-                  opacity={esriOverlayOpacity}
-                  attribution="Esri Boundaries & Places"
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  attribution="Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
                 />
-              )}
-              {showEsriTransportation && (
-                <TileLayer
-                  url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
-                  opacity={esriOverlayOpacity}
-                  attribution="Esri Transportation"
-                />
-              )}
-              {showEsriTopo && (
-                <TileLayer
-                  url="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-                  opacity={esriOverlayOpacity}
-                  attribution="Esri Topo"
-                />
-              )}
-              {showRailLayer && (
-                <TileLayer
-                  url="https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
-                  opacity={0.7}
-                  attribution="&copy; OpenRailwayMap contributors"
-                />
-              )}
-              {showConnections && <LocationConnections locations={locations} />}
-              {showHeatmap && (
-                <HeatmapOverlay
-                  points={filteredLocations.map(l => ({
-                    position: l.position,
-                    intensity: l.status === 'critical' ? 1 : 0.3
-                  }))}
-                />
-              )}
-              <LocationMarkers onSelect={setSelectedLocation} locations={locations} filters={filters} />
-              <StationMarkers />
-            </MapContainer>
+                {showEsriBoundaries && (
+                  <TileLayer
+                    url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                    opacity={esriOverlayOpacity}
+                    attribution="Esri Boundaries & Places"
+                  />
+                )}
+                {showEsriTransportation && (
+                  <TileLayer
+                    url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
+                    opacity={esriOverlayOpacity}
+                    attribution="Esri Transportation"
+                  />
+                )}
+                {showEsriTopo && (
+                  <TileLayer
+                    url="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                    opacity={esriOverlayOpacity}
+                    attribution="Esri Topo"
+                  />
+                )}
+                {(showRailLayer || isLayerEnabled(activeLayers, 'rail')) && (
+                  <TileLayer
+                    url="https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
+                    opacity={0.7}
+                    attribution="&copy; OpenRailwayMap contributors"
+                  />
+                )}
+                {showConnections && <LocationConnections locations={displayedLocations} />}
+                {showHeatmap && (
+                  <HeatmapOverlay
+                    points={displayedLocations.map(l => ({
+                      position: l.position,
+                      intensity: l.status === 'critical' ? 1 : 0.3,
+                    }))}
+                  />
+                )}
+                <MapViewportController />
+                <LocationMarkers onSelect={handleSelectLocation} locations={displayedLocations} filters={filters} />
+                <StationMarkers />
+              </MapContainer>
+            </div>
           )}
         </div>
-        <div style={{ flex: 1, minWidth: 260, background: '#FFFFFF', border: '1px solid #CCCCCC', borderRadius: 0, padding: 16, height: '100%' }}>
-          {renderControlPanel()}
-          <FormControlLabel
-            control={<Checkbox checked={showConnections} onChange={e => setShowConnections(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Connections</Typography>}
-            sx={{ mt: 2 }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showRailLayer} onChange={e => setShowRailLayer(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Rail Network</Typography>}
-            sx={{ mt: 0.5 }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Heatmap</Typography>}
-            sx={{ mt: 0.5 }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showEsriBoundaries} onChange={e => setShowEsriBoundaries(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Boundaries & Places</Typography>}
-            sx={{ mt: 0.5 }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showEsriTransportation} onChange={e => setShowEsriTransportation(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Roads & Railways</Typography>}
-            sx={{ mt: 0.5 }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showEsriTopo} onChange={e => setShowEsriTopo(e.target.checked)} size="small" />}
-            label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Topography</Typography>}
-            sx={{ mt: 0.5 }}
-          />
-          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #CCCCCC' }}>
-            <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 'bold', color: '#000000', mb: 0.5 }}>Overlay Transparency</Typography>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={esriOverlayOpacity}
-              onChange={e => setEsriOverlayOpacity(Number(e.target.value))}
-              style={{ width: '100%' }}
-            />
-            <Typography variant="caption" sx={{ fontSize: '10px', color: '#666666' }}>{Math.round(esriOverlayOpacity * 100)}%</Typography>
+
+        <div style={{ flex: 1, minWidth: 290, background: '#F7F9FB', border: '1px solid #CCCCCC', padding: 0, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <AssetDrawer asset={selectedAsset} open={Boolean(selectedAsset)} onClose={handleCloseAssetDrawer} />
+          <div style={{ padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <LayerManager activeLayers={activeLayers} onToggle={handleToggleEnterpriseLayer} />
+            <div style={{ border: '1px solid #CCCCCC', background: '#FFFFFF', padding: 16 }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 'bold', color: '#003366', mb: 1.5 }}>
+                Map Overlays
+              </Typography>
+              <FormControlLabel
+                control={<Checkbox checked={showConnections} onChange={e => setShowConnections(e.target.checked)} size="small" />}
+                label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Connections</Typography>}
+                sx={{ mt: 0, display: 'block' }}
+              />
+              <FormControlLabel
+                control={<Checkbox checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} size="small" />}
+                label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Show Heatmap</Typography>}
+                sx={{ mt: 0.25, display: 'block' }}
+              />
+              <FormControlLabel
+                control={<Checkbox checked={showEsriBoundaries} onChange={e => setShowEsriBoundaries(e.target.checked)} size="small" />}
+                label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Boundaries & Places</Typography>}
+                sx={{ mt: 0.25, display: 'block' }}
+              />
+              <FormControlLabel
+                control={<Checkbox checked={showEsriTransportation} onChange={e => setShowEsriTransportation(e.target.checked)} size="small" />}
+                label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Roads & Railways</Typography>}
+                sx={{ mt: 0.25, display: 'block' }}
+              />
+              <FormControlLabel
+                control={<Checkbox checked={showEsriTopo} onChange={e => setShowEsriTopo(e.target.checked)} size="small" />}
+                label={<Typography sx={{ fontSize: '11px', color: '#000000' }}>Topography</Typography>}
+                sx={{ mt: 0.25, display: 'block' }}
+              />
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #CCCCCC' }}>
+                <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 'bold', color: '#000000', mb: 0.5 }}>
+                  Overlay Transparency
+                </Typography>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={esriOverlayOpacity}
+                  onChange={e => setEsriOverlayOpacity(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+                <Typography variant="caption" sx={{ fontSize: '10px', color: '#666666' }}>
+                  {Math.round(esriOverlayOpacity * 100)}%
+                </Typography>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -330,13 +373,12 @@ function App() {
             <button className="menu-item">Help</button>
           </div>
         </div>
-        {/* Alarm-Benachrichtigungssystem */}
         {Array.isArray(locations) && locations.some(l => l.status === 'critical') && (
           <Alert severity="error" sx={{ mb: 2 }}>
             Kritische Warnung: Mindestens ein Standort befindet sich im Status <b>Kritisch</b>!
           </Alert>
         )}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, padding: '0 16px' }}>
           <Button variant="outlined" size="small" onClick={() => downloadCsv(locations)}>
             Standorte als CSV exportieren
           </Button>
@@ -346,10 +388,10 @@ function App() {
         </div>
         <div className="modal-status-bar">
           <span>User: Administrator | Status: CONNECTED</span>
-          <span>{filteredLocations.length} Facilities | {new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</span>
+          <span>{displayedLocations.length} Facilities | {new Date().toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</span>
         </div>
       </Modal>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -365,4 +407,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

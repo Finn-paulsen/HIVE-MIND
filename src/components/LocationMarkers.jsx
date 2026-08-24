@@ -24,9 +24,6 @@ import MetroTerminal from './terminals/terminals/MetroTerminal';
 import UniversityTerminal from './terminals/terminals/UniversityTerminal';
 import ControlTerminal from './terminals/terminals/ControlTerminal';
 
-// Beispielhafte Standorte und Typen
-// Standorte werden jetzt dynamisch über props.locations übergeben
-
 const typeIcon = {
   power: <FaBolt color="#2a4a7b" />,
   base: <FaBuilding color="#2a4a7b" />,
@@ -73,13 +70,14 @@ const buttonLabel = {
   control: 'Kontrollzentrum öffnen',
 };
 
-export function LocationMarkers({ typeFilter, locations, filters }) {
+export function LocationMarkers({ typeFilter, locations, filters, onSelect }) {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState(null);
 
   const handleOpenTerminal = (location) => {
     setSelectedFacility(location);
     setTerminalOpen(true);
+    onSelect?.(location);
   };
 
   const handleCloseTerminal = () => {
@@ -118,31 +116,25 @@ export function LocationMarkers({ typeFilter, locations, filters }) {
       </TerminalModal>
     );
   };
-  // Multi-criteria filtering
+
   const filtered = (locations || []).filter(loc => {
-    // Legacy single type filter (if provided)
     if (typeFilter && loc.type !== typeFilter) {
       return false;
     }
-    
-    // New multi-filter support
+
     if (filters) {
-      // Type filter
       if (filters.types && filters.types.length > 0 && !filters.types.includes(loc.type)) {
         return false;
       }
-      
-      // Status filter
+
       if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes(loc.status)) {
         return false;
       }
-      
-      // Country filter
+
       if (filters.countries && filters.countries.length > 0 && !filters.countries.includes(loc.country)) {
         return false;
       }
-      
-      // Search filter
+
       if (filters.search && filters.search.trim() !== '') {
         const searchLower = filters.search.toLowerCase();
         const matchesName = loc.name.toLowerCase().includes(searchLower);
@@ -152,7 +144,7 @@ export function LocationMarkers({ typeFilter, locations, filters }) {
         }
       }
     }
-    
+
     return true;
   });
 
@@ -160,7 +152,13 @@ export function LocationMarkers({ typeFilter, locations, filters }) {
     <>
       <MarkerClusterGroup>
         {filtered.map(loc => (
-          <Marker key={loc.id} position={loc.position}>
+          <Marker
+            key={loc.id}
+            position={loc.position}
+            eventHandlers={{
+              click: () => onSelect?.(loc),
+            }}
+          >
             <Popup>
               <div style={{ minWidth: 220 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2a4a7b', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
